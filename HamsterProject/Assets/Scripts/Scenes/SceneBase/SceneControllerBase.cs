@@ -16,7 +16,7 @@ public abstract class SceneControllerBase : MonoBehaviour
     }
 
     /// <summary>
-    /// €”õ
+    /// €”õ(Async‚È‚Ç‚Ì‘Ò‚¿ˆ—‚ª•K—v‚Å‚ ‚ê‚Î‘Î‰‚µ‚Ü‚·)
     /// </summary>
     private void Prepare()
     {

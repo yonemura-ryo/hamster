@@ -1,4 +1,3 @@
-Ôªøusing UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -8,10 +7,7 @@ using TMPro;
 using UnityEditor;
 #endif
 
-/// <summary>
-/// Êã°ÂºµÁî®„Éú„Çø„É≥„ÇØ„É©„Çπ
-/// </summary>
-public class MyButton : Button
+public class CustomButton : Button
 {
     [SerializeField] public TextMeshProUGUI TMPText;
     [SerializeField] public ButtonSoundType SoundType = ButtonSoundType.Push;
@@ -26,16 +22,16 @@ public class MyButton : Button
     }
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(MyButton))]
+    [CustomEditor(typeof(CustomButton))]
     public class CustomButtonEditor : UnityEditor.UI.ButtonEditor
     {
         /// <summary>
-        /// „Ç§„É≥„Çπ„Éö„ÇØ„Çø„Éº„Å´„Ç¢„Çø„ÉÉ„ÉÅ„Åô„ÇãÁî®.
+        /// ÉCÉìÉXÉyÉNÉ^Å[Ç…ÉAÉ^ÉbÉ`Ç∑ÇÈóp.
         /// </summary>
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            var component = (MyButton)target;
+            var component = (CustomButton)target;
 
             component.SoundType = (ButtonSoundType)EditorGUILayout.EnumPopup("Sound Type", component.SoundType);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("TMPText"));

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
@@ -9,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public class DialogBase : MonoBehaviour
 {
-    [SerializeField] protected MyButton closeButton = null;
+    [SerializeField] protected CustomButton closeButton = null;
 
     // ダイアログを閉じる時のcall back.
     protected Action closeAction;

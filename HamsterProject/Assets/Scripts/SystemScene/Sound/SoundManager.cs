@@ -14,6 +14,11 @@ public class SoundManager : MonoBehaviour
     /// </summary>
     public void Initialize(SoundVolume volume)
     {
+        if(soundPresenter == null)
+        {
+            return;
+        }
+
         SoundModel model = new SoundModel(volume);
         soundPresenter.Initialize(model);
     }

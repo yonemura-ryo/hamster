@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 using System.Linq;
@@ -13,7 +12,6 @@ public class SystemScene : SingletonMonobehaviour<SystemScene>
     [SerializeField] private SceneTransitionManager sceneTransitionManager = null;
     [SerializeField] private SoundManager soundManager = null;
     [SerializeField] private DialogContainer dialogContainer = null;
-    [SerializeField] private MyButton settingButton = null;
 
     protected override bool dontDestroyOnLoad { get { return true; } }
 
@@ -24,6 +22,9 @@ public class SystemScene : SingletonMonobehaviour<SystemScene>
 
     /// <summary> シーン遷移インターフェース公開用</summary>
     public ISceneTransitioner SceneTransitioner { get; private set; }
+
+    /// <summary>  ダイアログコンテナ公開用 </summary>
+    public IDialogContainer DialogContainer => dialogContainer;
 
     /// <summary> シーン遷移引き渡しパラメータ </summary>
     public object SceneParam => sceneTransitionManager.SceneParam;
@@ -55,19 +56,10 @@ public class SystemScene : SingletonMonobehaviour<SystemScene>
         Awaker().Forget();
 
         soundManager.Initialize(new SoundVolume(0.5f, 0.5f, 0.5f, 0.5f));
-        sceneTransitionManager.Initialize(isOutGame =>
-        {
-            settingButton.gameObject.SetActive(isOutGame);
-        });
+        sceneTransitionManager.Initialize(null);
 
         SoundPlayer = soundManager.GetSoundPlayer();
         SceneTransitioner = sceneTransitionManager.GetSceneTransitioner();
-
-        settingButton.OnClickAsObservable().Subscribe(_ =>
-        {
-            SettingDialog settingDialog = dialogContainer.Show<SettingDialog>();
-            settingDialog.Initialize(SoundPlayer, soundManager.GetSoundVolume());
-        }).AddTo(this);
     }
 
     /// <summary>

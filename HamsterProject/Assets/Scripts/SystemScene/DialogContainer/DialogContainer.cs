@@ -13,7 +13,12 @@ public class DialogContainer : MonoBehaviour, IDialogContainer
     [SerializeField] private DialogBase[] dialogs = null;
 
     private const float AnimationTIme = 0.3f;
-    
+
+    private void Start()
+    {
+        gameObject.SetActive(false);
+    }
+
     /// <summary>
     /// ダイアログ表示
     /// </summary>
