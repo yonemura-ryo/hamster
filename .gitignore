@@ -29,8 +29,8 @@ Thums.db
 gmcs.rsp*
 smcs.rsp*
 
-IWantAre/Logs
-IWantAre/UserSettings
+HamsterProject/Logs
+HamsterProject/UserSettings
 *.sln
 *.vsconfig
 
