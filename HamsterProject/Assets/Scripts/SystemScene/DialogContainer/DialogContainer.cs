@@ -16,7 +16,7 @@ public class DialogContainer : MonoBehaviour, IDialogContainer
 
     private void Start()
     {
-        gameObject.SetActive(false);
+        backGround.gameObject.SetActive(false);
     }
 
     /// <summary>
