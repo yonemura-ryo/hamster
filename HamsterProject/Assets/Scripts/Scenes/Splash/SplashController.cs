@@ -1,5 +1,18 @@
 using UnityEngine;
 
+[System.Serializable]
+public class SampleData
+{
+    public string text;
+    public SampleDataData x;
+}
+
+[System.Serializable]
+public class SampleDataData
+{
+    public string text;
+}
+
 /// <summary>
 /// Splash Scene Controller.
 /// </summary>
@@ -14,5 +27,12 @@ public class SplashController : SceneControllerBase
     {
         SplashModel model  =new SplashModel(SystemScene.Instance.SceneTransitioner);
         splashPresenter.Initialize(model);
+
+        SampleData Data = new SampleData();
+        Data.text = "‚±‚ñ‚É‚¿‚Í";
+        Data.x = new SampleDataData();
+        Data.x.text = "‚±‚ñ‚Î‚ñ‚Í";
+
+        LocalPrefs.Save("Sample", Data);
     }
 }
