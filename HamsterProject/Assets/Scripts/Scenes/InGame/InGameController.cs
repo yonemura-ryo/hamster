@@ -11,7 +11,7 @@ public class InGameController : SceneControllerBase
     protected override void Initialize()
     {
         SampleData data;
-        data = LocalPrefs.Load<SampleData>("Sample");
+        data = LocalPrefs.Load<SampleData>(SaveData.Key.Sample);
 
         Debug.Log(data.text);
         Debug.Log(data.x.text);

@@ -33,6 +33,6 @@ public class SplashController : SceneControllerBase
         Data.x = new SampleDataData();
         Data.x.text = "‚±‚ñ‚Î‚ñ‚Í";
 
-        LocalPrefs.Save("Sample", Data);
+        LocalPrefs.Save(SaveData.Key.Sample, Data);
     }
 }
