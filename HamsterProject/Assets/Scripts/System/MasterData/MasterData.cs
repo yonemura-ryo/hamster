@@ -29,9 +29,11 @@ public partial class MasterDataDB
     //public IReadOnlyDictionary<int, AreCardMaster> AreCardMaster => areCardMaster;
     /// <summary> m_word_card公開用 </summary>
     //public IReadOnlyDictionary<int, WordCardMaster> WordCardMaster => wordCardMaster;
+    public IReadOnlyDictionary<int, HamsterMaster> HamsterMaster => hamsterMaster;
 
     //private Dictionary<int, AreCardMaster> areCardMaster;
     //private Dictionary<int, WordCardMaster> wordCardMaster;
+    private Dictionary<int, HamsterMaster> hamsterMaster;
 
     /// <summary>
     /// Constructor.
@@ -40,6 +42,7 @@ public partial class MasterDataDB
     {
         //areCardMaster = GetAreCardMaster(MasterDefine.Name.AreCardMaster);
         //wordCardMaster = GetWordCardMaster(MasterDefine.Name.WordCardMaster);
+        hamsterMaster = GetHamsterMaster(MasterDefine.Name.HamsterMaster);
     }
 
     /// <summary>

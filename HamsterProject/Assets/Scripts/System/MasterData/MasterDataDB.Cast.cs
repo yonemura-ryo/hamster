@@ -63,4 +63,28 @@ public partial class MasterDataDB
         return result;
     }
     */
+    
+    /// <summary>
+    /// Get HamsterMaster.
+    /// </summary>
+    /// <param name="masterName"></param>
+    /// <returns></returns>
+    private Dictionary<int, HamsterMaster> GetHamsterMaster(string masterName)
+    {
+        Dictionary<int, HamsterMaster> result = new Dictionary<int, HamsterMaster>();
+
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new HamsterMaster{
+                HamsterID = Id,
+                Name = line[1],
+                ImagePath = line[2],
+                BugID = int.Parse(line[3]),
+            });
+        }
+
+        return result;
+    }
 }
