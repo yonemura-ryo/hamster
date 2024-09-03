@@ -30,4 +30,12 @@ public class HamsterMaster
         get { return bugID; }
         set { bugID = value; }
     }
+
+    private float bugFixTime;
+
+    public float BugFixTime
+    {
+        get { return bugFixTime; }
+        set { bugFixTime = value; }
+    }
 }

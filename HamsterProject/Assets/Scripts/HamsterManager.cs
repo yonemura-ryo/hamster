@@ -25,6 +25,8 @@ public class HamsterManager : MonoBehaviour
     private int itemPositionNum = 3;
     private int bugHumsterNum = 1;
     
+    private List<GameObject> hamsterList = new List<GameObject>();
+    
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
 
@@ -56,8 +58,11 @@ public class HamsterManager : MonoBehaviour
             hamster.GetComponent<HamsterController>().Initialize(
                 MasterData.DB.HamsterMaster[normalHamID],
                 itemPositions[i],
-                () => ShowDialogByFixedHamster()
+                () => ShowDialogByFixedHamster(hamster)
                 );
+            
+            // TODO 仮
+            hamsterList.Add(hamster);
         }
 
         var bugHumID = 2; // TODO 仮
@@ -69,14 +74,22 @@ public class HamsterManager : MonoBehaviour
             bugHamster.GetComponent<HamsterController>().Initialize(
                 MasterData.DB.HamsterMaster[bugHumID],
                 itemPositions[itemPositionNum - bugHumsterNum + i],
-                () => ShowDialogByFixedHamster(),
+                () => ShowDialogByFixedHamster(bugHamster),
                 MasterData.DB.HamsterMaster[normalHamID]
                 );
+            // TODO 仮
+            hamsterList.Add(bugHamster);
         }
     }
-    
-    public void ShowDialogByFixedHamster()
+
+    /// <summary>
+    /// ハムスター修理完了ダイアログ
+    /// </summary>
+    /// <param name="hamster"></param>
+    public void ShowDialogByFixedHamster(GameObject hamster)
     {
-        dialogContainer.Show<HamsterFixedDialog>();
+        HamsterFixedDialog hamsterFixedDialog = dialogContainer.Show<HamsterFixedDialog>();
+        hamsterFixedDialog.SetHamsterImage(hamster.GetComponent<HamsterPresenter>().GetFixedHamsterImage());
+        Destroy(hamster);
     }
 }

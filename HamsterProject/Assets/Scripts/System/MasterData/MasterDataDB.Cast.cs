@@ -82,6 +82,7 @@ public partial class MasterDataDB
                 Name = line[1],
                 ImagePath = line[2],
                 BugID = int.Parse(line[3]),
+                BugFixTime = float.Parse(line[4]),
             });
         }
 

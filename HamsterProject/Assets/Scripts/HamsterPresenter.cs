@@ -14,6 +14,11 @@ public class HamsterPresenter : MonoBehaviour
 
     private Action finishFixAction;
 
+    public Sprite GetFixedHamsterImage()
+    {
+        return Resources.Load<Sprite>(this.hamsterModel.GetFixedHamsterImagePath());
+    }
+
     /// <summary>
     /// Initialize.
     /// </summary>

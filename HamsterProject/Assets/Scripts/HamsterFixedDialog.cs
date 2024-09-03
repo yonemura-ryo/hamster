@@ -7,6 +7,7 @@ using UnityEngine.UI;
 // システムシーン常駐の設定ダイアログ
 public class HamsterFixedDialog : DialogBase
 {
+    [SerializeField] Image hamsterImage;
     /// <summary>
     /// ダイアログ表示
     /// </summary>
@@ -21,6 +22,11 @@ public class HamsterFixedDialog : DialogBase
     public override void Close()
     {
         base.Close();
+    }
+
+    public void SetHamsterImage(Sprite sprite)
+    {
+        hamsterImage.sprite = sprite;
     }
 }
     

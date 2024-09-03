@@ -5,8 +5,7 @@ public class HamsterModel
     private HamsterMaster hamsterMaster;
     private HamsterMaster fixedHamsterMaster = null;
     
-    // TODO 仮　マスタからバグ修正時間は持ってくる
-    private float requireBbugfixTime = 10f;
+    private float requireBbugfixTime = 0f;
 
     private DateTime finishBugFixDatetime = DateTime.MinValue;
     public HamsterModel(HamsterMaster hamsterMaster, HamsterMaster fixedHamsterMaster=null)
@@ -14,6 +13,7 @@ public class HamsterModel
         // hamsterIDから対象のデータを持って設定する
         this.hamsterMaster = hamsterMaster;
         this.fixedHamsterMaster = fixedHamsterMaster;
+        requireBbugfixTime = hamsterMaster.BugFixTime;
     }
 
     /// <summary>
@@ -23,6 +23,15 @@ public class HamsterModel
     public string GetHamsterImagePath()
     {
         return "Hamsters/" + hamsterMaster.ImagePath;
+    }
+
+    public string GetFixedHamsterImagePath()
+    {
+        if (fixedHamsterMaster == null)
+        {
+            return "";
+        }
+        return "Hamsters/" + fixedHamsterMaster.ImagePath;
     }
 
     /// <summary>
