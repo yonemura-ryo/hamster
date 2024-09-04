@@ -17,7 +17,7 @@ public class HamsterController : MonoBehaviour
     /// </summary>
     /// <param name="hamsterMaster"></param>
     /// <param name="position"></param>
-    public void Initialize(HamsterMaster hamsterMaster, Transform position, Action finishFixAction, HamsterMaster fixedHamssterMaster=null)
+    public void Initialize(HamsterMaster hamsterMaster, Transform position, Action<GameObject> finishFixAction, HamsterMaster fixedHamssterMaster=null)
     {
         HamsterModel hamsterModel = new HamsterModel(hamsterMaster, fixedHamssterMaster);
         this.finishFixAction = finishFixAction;

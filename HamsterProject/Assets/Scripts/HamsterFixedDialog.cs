@@ -24,9 +24,9 @@ public class HamsterFixedDialog : DialogBase
         base.Close();
     }
 
-    public void SetHamsterImage(Sprite sprite)
+    public void SetHamsterImage(string sprite)
     {
-        hamsterImage.sprite = sprite;
+        hamsterImage.sprite = Resources.Load<Sprite>(sprite);
     }
 }
     

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,13 @@ public abstract class SceneControllerBase : MonoBehaviour
     private void Start()
     {
         Prepare();
+        PrepareAsync().Forget();
         Initialize();
+    }
+
+    virtual protected async UniTask PrepareAsync() 
+    {
+        // return UniTask.CompletedTask;
     }
 
     /// <summary>
