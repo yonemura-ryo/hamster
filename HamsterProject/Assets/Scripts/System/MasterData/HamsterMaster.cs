@@ -1,41 +1,21 @@
 public class HamsterMaster
 {
-    private int hamsterID;
-
-    public int HamsterID
+    public HamsterMaster(int id, string name, string imagePath, int bugId, float bugFixTime)
     {
-        get { return hamsterID; }
-        set { hamsterID = value; }
+        HamsterId = id;
+        Name = name; 
+        ImagePath= imagePath;
+        BugId = bugId;
+        BugFixTime = bugFixTime;
     }
+
+    public int HamsterId { get; }
     
-    private string name;
-
-    public string Name {
-        get { return name; }
-        set { name = value; }
-    }
-
-    private string imagePath;
-
-    public string ImagePath
-    {
-        get { return imagePath; }
-        set { imagePath = value; }
-    }
-
-    private int bugID;
-
-    public int BugID
-    {
-        get { return bugID; }
-        set { bugID = value; }
-    }
-
-    private float bugFixTime;
-
-    public float BugFixTime
-    {
-        get { return bugFixTime; }
-        set { bugFixTime = value; }
-    }
+    public string Name { get; }
+    
+    public string ImagePath { get; }
+    
+    public int BugId { get; }
+    
+    public float BugFixTime { get; }
 }

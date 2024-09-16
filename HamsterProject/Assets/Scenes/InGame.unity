@@ -508,6 +508,7 @@ MonoBehaviour:
   sceneBgmType: 0
   inGamePresenter: {fileID: 1271442647}
   dialogContainer: {fileID: 1078439497}
+  hamsterManager: {fileID: 1647291878}
 --- !u!1 &1271442646
 GameObject:
   m_ObjectHideFlags: 0
@@ -850,6 +851,7 @@ MonoBehaviour:
   - {fileID: 1801375700}
   - {fileID: 1690425806}
   dialogContainer: {fileID: 1078439497}
+  hamsterList: []
 --- !u!4 &1647291879
 Transform:
   m_ObjectHideFlags: 0

@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1232836219043823761}
-  - component: {fileID: 3890591755170014582}
-  - component: {fileID: 4827090315371759255}
   - component: {fileID: -5728563395143707726}
+  - component: {fileID: 1078500602433181735}
   m_Layer: 5
   m_Name: HamsterPrefab
   m_TagString: Untagged
@@ -40,33 +39,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &3890591755170014582
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1389367442502466747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce44b5f3efdf57b46b95a446192d517b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hamsterPresenter: {fileID: 4827090315371759255}
---- !u!114 &4827090315371759255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1389367442502466747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa022e09e1284d6790ba209b6a6e3eaf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hamsterImage: {fileID: 5206978011482982237}
-  fixCountDownText: {fileID: 8824418765314631684}
 --- !u!114 &-5728563395143707726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,8 +56,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 3890591755170014582}
-          m_TargetAssemblyTypeName: HamsterController, Assembly-CSharp
+        - m_Target: {fileID: 1078500602433181735}
+          m_TargetAssemblyTypeName: Hamster, Assembly-CSharp
           m_MethodName: OnClickHamster
           m_Mode: 1
           m_Arguments:
@@ -96,6 +68,20 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!114 &1078500602433181735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1389367442502466747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8956a756d130c4d43b39b8ed8cbd1d27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hamsterImage: {fileID: 5206978011482982237}
+  fixCountDownText: {fileID: 8824418765314631684}
 --- !u!1 &3931025570202311464
 GameObject:
   m_ObjectHideFlags: 0

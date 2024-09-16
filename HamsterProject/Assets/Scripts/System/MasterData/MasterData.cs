@@ -25,14 +25,9 @@ public static class MasterData
 /// </summary>
 public partial class MasterDataDB
 {
-    /// <summary>m_are_card公開用 </summary>
-    //public IReadOnlyDictionary<int, AreCardMaster> AreCardMaster => areCardMaster;
-    /// <summary> m_word_card公開用 </summary>
-    //public IReadOnlyDictionary<int, WordCardMaster> WordCardMaster => wordCardMaster;
+    /// <summary> m_hamster公開用 </summary>
     public IReadOnlyDictionary<int, HamsterMaster> HamsterMaster => hamsterMaster;
 
-    //private Dictionary<int, AreCardMaster> areCardMaster;
-    //private Dictionary<int, WordCardMaster> wordCardMaster;
     private Dictionary<int, HamsterMaster> hamsterMaster;
 
     /// <summary>
@@ -40,8 +35,6 @@ public partial class MasterDataDB
     /// </summary>
     public MasterDataDB()
     {
-        //areCardMaster = GetAreCardMaster(MasterDefine.Name.AreCardMaster);
-        //wordCardMaster = GetWordCardMaster(MasterDefine.Name.WordCardMaster);
         hamsterMaster = GetHamsterMaster(MasterDefine.Name.HamsterMaster);
     }
 

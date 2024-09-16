@@ -6,7 +6,7 @@ public class InGameController : SceneControllerBase
 {
     [SerializeField] private InGamePresenter inGamePresenter = null;
     [SerializeField] private DialogContainer dialogContainer = null;
-    
+    [SerializeField] private HamsterManager hamsterManager = null;
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
 
@@ -23,5 +23,6 @@ public class InGameController : SceneControllerBase
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         inGamePresenter.Initialize(model);
+        hamsterManager.Initialize();
     }
 }
