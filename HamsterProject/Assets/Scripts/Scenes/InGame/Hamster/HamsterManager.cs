@@ -24,6 +24,7 @@ public class HamsterManager : MonoBehaviour
     
     private int itemPositionNum = 3;
     private int bugHumsterNum = 1;
+    private Action<int> addCoin = null;
     
     // TODO Listにすると削除時indexずれるので配列にする
     public List<Hamster> hamsterList = new List<Hamster>();
@@ -47,8 +48,10 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize()
+    public void Initialize(Action<int> addCoin)
     {
+        // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
+        this.addCoin = addCoin;
         IReadOnlyDictionary<int, HamsterMaster> HamsterMaster = MasterData.DB.HamsterMaster;
         // TODO 通常ハムスター出現処理つくる
         var normalHamID = 1;
@@ -101,5 +104,7 @@ public class HamsterManager : MonoBehaviour
         hamsterList.RemoveAt(hamsterIndex);
         hamsterFixedDialog.SetHamsterImage(Resources.Load<Sprite>(imagePath));
         Destroy(hamster);
+        // TODO マスタからハムの金額参照
+        addCoin?.Invoke(100);
     }
 }
