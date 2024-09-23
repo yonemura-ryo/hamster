@@ -261,14 +261,12 @@ public class HamsterManager : MonoBehaviour
     /// <returns></returns>
     private bool IsExistBugHamster()
     {
-        for (int i = 0; i < hamsterList.Count; i++)
+        foreach (var hamsterDictionary in hamsterList)
         {
-            if (hamsterList.TryGetValue(i, out Hamster hamster))
+            Hamster hamster = hamsterDictionary.Value;
+            if (hamster.GetHamsterBugId() > 0)
             {
-                if (hamster.GetHamsterBugId() > 0)
-                {
-                    return true;
-                }
+                return true;
             }
         }
         return false;
