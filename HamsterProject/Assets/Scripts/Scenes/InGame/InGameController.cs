@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 public class InGameController : SceneControllerBase
 {
@@ -9,11 +10,21 @@ public class InGameController : SceneControllerBase
     [SerializeField] private DialogContainer dialogContainer = null;
     [SerializeField] private HamsterManager hamsterManager = null;
     
+    /// <summary>
+    /// 表示オブジェクト
+    /// </summary>
     [SerializeField] private List<Facility> facilities = new List<Facility>();
     [SerializeField] private List<FoodArea> foodAreas = new List<FoodArea>();
 
+    /// <summary>
+    /// マスターデータ
+    /// </summary>
     private IReadOnlyDictionary<int, FacilityMaster> FacilityMaster = null;
     private IReadOnlyDictionary<int, FoodMaster> FoodMaster = null;
+    
+    /// <summary>
+    /// セーブデータ
+    /// </summary>
     // TODO 一時的[SerializeField] 外す
     [SerializeField] private FacilityListData facilityListData = null;
     private UserCommonData userCommonData = null;
@@ -55,6 +66,7 @@ public class InGameController : SceneControllerBase
             havingFoodData.havingFoodDictionary = new SerializableDictionary<int, FoodData>();
             LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
         }
+        // DebugAcquireFood(1, 5);
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         inGamePresenter.Initialize(model, userCommonData.coinCount);
@@ -79,7 +91,7 @@ public class InGameController : SceneControllerBase
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
         }
         // ハムの初期化
-        // hamsterManager.Initialize(AddCoin);
+        hamsterManager.Initialize(foodAreas,AddCoin,ConsumeFood);
     }
 
     /// <summary>
@@ -158,13 +170,44 @@ public class InGameController : SceneControllerBase
             );
     }
 
+    /// <summary>
+    /// 餌使用配置
+    /// </summary>
+    /// <param name="foodAreaId"></param>
+    /// <param name="foodId"></param>
+    public void UseFood(int foodAreaId, int foodId)
+    {
+        // TODO 餌の配置と消費時間管理
+        foodAreas[foodAreaId].SetFood(foodId);
+        FoodMaster foodMasterData = FoodMaster[foodId];
+        Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
+            .Subscribe (delay => {
+                foodAreas[foodAreaId].SetEmptyFood();
+            });
+        // 餌消費
+        havingFoodData.havingFoodDictionary[foodId].count--;
+        LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
+    }
+
+    /// <summary>
+    /// 餌配置ダイアログ
+    /// </summary>
+    /// <param name="foodAreaId"></param>
     public void ShowDialogByFoodArea(int foodAreaId)
     {
         // TODO 餌選択ダイアログ
         FoodAreaDialog foodAreaDialog = dialogContainer.Show<FoodAreaDialog>();
         foodAreaDialog.Initialize(
-            havingFoodData.havingFoodDictionary
+            foodAreaId,
+            havingFoodData.havingFoodDictionary,
+            UseFood
             );
+    }
+
+    public void ConsumeFood(int foodAreaId)
+    {
+        foodAreas[foodAreaId].SetEmptyFood();
+        // TODO 餌消費Timerの削除
     }
 
     /// <summary>
@@ -175,7 +218,8 @@ public class InGameController : SceneControllerBase
         DebugDialog debugDialog = dialogContainer.Show<DebugDialog>();
         debugDialog.Initialize(
             AddCoin,
-            DebugClearPlayerPrefs
+            DebugClearPlayerPrefs,
+            DebugAcquireFood
             );
     }
 

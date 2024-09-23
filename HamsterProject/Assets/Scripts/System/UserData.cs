@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// １施設のデータ
+/// 施設単体のデータ
 /// </summary>
 [System.Serializable]
 public class FacilityData
@@ -20,6 +21,9 @@ public class FacilityListData
     public FacilityData[] facilities;
 }
 
+/// <summary>
+/// 餌単体情報
+/// </summary>
 [System.Serializable]
 public class FoodData
 {
@@ -27,10 +31,26 @@ public class FoodData
     public int count;
 }
 
+/// <summary>
+/// 所持餌データ
+/// </summary>
 [System.Serializable]
 public class HavingFoodData
 {
     public SerializableDictionary<int , FoodData> havingFoodDictionary;
+}
+
+[System.Serializable]
+public class HamsterData
+{
+    public int hamsterId;
+    public DateTime bugFixTime;
+}
+
+[System.Serializable]
+public class HamsterExistData
+{
+    public SerializableDictionary<int, HamsterData> hamsterExistDictionary;
 }
 
 /// <summary>

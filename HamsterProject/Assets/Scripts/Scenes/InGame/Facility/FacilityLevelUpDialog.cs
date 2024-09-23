@@ -68,6 +68,8 @@ public class FacilityLevelUpDialog : DialogBase
             facilityLevelText.text = "Lv." + facilityLevel.ToString();
             // レベルアップに必要なコイン数
             facilityNeedCoinText.text = FacilityLevelMaster[MakeFacilityLevelMasterIndex(facilityLevelType, facilityLevel)].NeedCoin.ToString();
+            // レベルアップボタン
+            facilityLevelUpButtonText.text = "レベルアップ";
         }
     }
 

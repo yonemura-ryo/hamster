@@ -23,6 +23,9 @@ public class Hamster : MonoBehaviour
     private RectTransform _rectTransform;
     private Action<int,string> _finishFixAction;
     private int _hamsterIndex = 0;
+    
+    private int _disappearCount = 0;
+    private Action<int> _disappearAction;
 
 
     /// <summary>
@@ -34,7 +37,7 @@ public class Hamster : MonoBehaviour
     /// <param name="imagePath"></param>
     /// <param name="requireBugFixTime"></param>
     /// <param name="bugId"></param>
-    public void Initialize(int hamsterIndex, Transform position, Action<int,string> finishFixAction, string imagePath, float requireBugFixTime, int bugId)
+    public void Initialize(int hamsterIndex, Transform position, Action<int,string> finishFixAction, string imagePath, float requireBugFixTime, int bugId, Action<int> disappearAction)
     {
         _hamsterIndex = hamsterIndex;
         _finishFixAction = finishFixAction;
@@ -44,6 +47,7 @@ public class Hamster : MonoBehaviour
         _bugId = bugId;
         _rectTransform = GetComponent<RectTransform>();
         _rectTransform.localPosition = position.localPosition;
+        _disappearAction = disappearAction;
         
         hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
         MakeBug();
@@ -70,6 +74,11 @@ public class Hamster : MonoBehaviour
         }
         return "Images/Hamsters/" + _fixedHamsterImagePath;
     }
+
+    public int GetHamsterBugId()
+    {
+        return _bugId;
+    }
     
     /// <summary>
     /// ハムスタータップ時処理
@@ -79,7 +88,13 @@ public class Hamster : MonoBehaviour
         // TODO 修正時間の操作系はManager側に移す（予定）
         if (_bugId <= 0)
         {
-            // バグじゃなければ一旦何もしない
+            // TODO 通常ハムタップ時の動作検討
+            // 2回タップしたら消える
+            _disappearCount++;
+            if (_disappearCount >= 2)
+            {
+                _disappearAction?.Invoke(_hamsterIndex);
+            }
             return;
         }
 
