@@ -27,8 +27,14 @@ public partial class MasterDataDB
 {
     /// <summary> m_hamster公開用 </summary>
     public IReadOnlyDictionary<int, HamsterMaster> HamsterMaster => hamsterMaster;
+    public IReadOnlyDictionary<int, FacilityMaster> FacilityMaster => facilityMaster;
+    public IReadOnlyDictionary<string, FacilityLevelMaster> FacilityLevelMaster => facilityLevelMaster;
+    public IReadOnlyDictionary<int, FoodMaster> FoodMaster => foodMaster;
 
     private Dictionary<int, HamsterMaster> hamsterMaster;
+    private Dictionary<int, FacilityMaster> facilityMaster;
+    private Dictionary<string, FacilityLevelMaster> facilityLevelMaster;
+    private Dictionary<int, FoodMaster> foodMaster;
 
     /// <summary>
     /// Constructor.
@@ -36,6 +42,9 @@ public partial class MasterDataDB
     public MasterDataDB()
     {
         hamsterMaster = GetHamsterMaster(MasterDefine.Name.HamsterMaster);
+        facilityMaster = GetFacilityMaster(MasterDefine.Name.FacilityMaster);
+        facilityLevelMaster = GetFacilityLevelMaster(MasterDefine.Name.FacilityLevelMaster);
+        foodMaster = GetFoodMaster(MasterDefine.Name.FoodMaster);
     }
 
     /// <summary>

@@ -7,5 +7,9 @@ public static class SaveData
     public static class Key
     {
         public const string Sample = "Sample";
+        public const string FacilityList = "FacilityList";
+        public const string UserCommonData = "UserCommonData";
+        public const string HavingFoodData = "HavingFoodData";
+        public const string HamsterExistData = "HamsterExistData";
     }
 }
