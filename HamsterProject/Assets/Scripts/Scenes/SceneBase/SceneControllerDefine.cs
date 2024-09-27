@@ -8,7 +8,7 @@ public class SceneControllerDefine
 
     public static readonly Dictionary<int, string> SceneBgmTitle = new Dictionary<int, string>()
     {
-        { (int)SceneBgmType.ForwardTommorow, SoundDefine.Bgm.ForwardTommorow }
+        { (int)SceneBgmType.Bgm01, SoundDefine.Bgm.Bgm01 }
     };
 }
 
@@ -18,5 +18,5 @@ public class SceneControllerDefine
 public enum SceneBgmType
 {
     None = 0,
-    ForwardTommorow = 1,
+    Bgm01 = 1,
 }
