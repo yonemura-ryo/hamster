@@ -50,8 +50,7 @@ public class MenuDialog : DialogBase
         SettingsButton.OnClickAsObservable().Subscribe(_ =>
         {
             SettingDialog settingDialog = dialogContainer?.Show<SettingDialog>(OnCloseNextDialog);
-            SoundVolume volume = LocalPrefs.Load<SoundVolume>(SaveData.Key.SoundVolume);
-            settingDialog?.Initialize(soundPlayer, sceneTransitioner, volume);
+            settingDialog?.Initialize(soundPlayer, sceneTransitioner);
             gameObject.SetActive(false);
         }).AddTo(this);
     }

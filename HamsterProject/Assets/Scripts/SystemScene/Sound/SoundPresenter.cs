@@ -141,4 +141,24 @@ public class SoundPresenter : MonoBehaviour, ISoundPlayer
         //voiceAudio.volume = soundModel.CalcVoiceVolume(soundModel.VoiceVolume);
         LocalPrefs.Save(SaveData.Key.SoundVolume, new SoundVolume(soundModel.MasterVolume, soundModel.BgmVolume, soundModel.SeVolume));
     }
+
+    public float GetMasterVolume()
+    {
+        return soundModel.MasterVolume;
+    }
+
+    public float GetBgmVolume()
+    {
+        return soundModel.BgmVolume;
+    }
+
+    public float GetSeVolume()
+    {
+        return soundModel.SeVolume;
+    }
+
+    public float GetVoiceVolume()
+    {
+        return 0.0f;
+    }
 }

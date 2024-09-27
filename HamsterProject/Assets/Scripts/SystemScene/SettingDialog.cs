@@ -41,11 +41,11 @@ public class SettingDialog : DialogBase
     /// <param name="soundPlayer">サウンドプレイヤー</param>
     /// <param name="sceneTransitioner">シーン遷移用</param>
     /// <param name="soundVolume">サウンドボリューム</param>
-    public void Initialize(ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner, SoundVolume soundVolume)
+    public void Initialize(ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner)
     {
-        bgmSlider.value = soundVolume.BgmVolume;
-        seSlider.value = soundVolume.SeVolume;
-        masterSlider.value = soundVolume.MasterVolume;
+        bgmSlider.value = soundPlayer.GetBgmVolume();
+        seSlider.value = soundPlayer.GetSeVolume();
+        masterSlider.value = soundPlayer.GetMasterVolume();
 
         bgmSlider.OnValueChangedAsObservable().Subscribe(volume =>
         {
