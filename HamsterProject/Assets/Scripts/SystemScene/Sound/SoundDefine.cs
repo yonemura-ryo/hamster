@@ -16,7 +16,7 @@ public class SoundDefine
     public class Bgm
     {
         /// <summary> BGM name "forward_tomorrow". </summary>
-        public const string ForwardTommorow = "forward_tomorrow";
+        public const string Bgm01 = "forward_tomorrow";
     }
 
     /// <summary>

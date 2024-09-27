@@ -15,7 +15,7 @@ public class DialogBase : MonoBehaviour
     /// <summary>
     /// ダイアログ表示
     /// </summary>
-    public virtual void Show(Action closeAction)
+    public virtual void Show(Action closeAction = null)
     {
         if(closeButton != null)
         {

@@ -69,7 +69,7 @@ public class InGameController : SceneControllerBase
         // DebugAcquireFood(1, 5);
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
-        inGamePresenter.Initialize(model, userCommonData.coinCount);
+        inGamePresenter.Initialize(model, dialogContainer, userCommonData.coinCount);
         // 施設の初期化
         foreach (var facilityData in facilityListData.facilities)
         {

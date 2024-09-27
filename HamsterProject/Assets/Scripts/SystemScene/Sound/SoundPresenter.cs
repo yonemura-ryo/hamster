@@ -40,7 +40,7 @@ public class SoundPresenter : MonoBehaviour, ISoundPlayer
     /// <param name="soundName"></param>
     public void PlaySe(string soundName)
     {
-        AudioClip se = Resources.Load<AudioClip>($"Sound/Se/{soundName}");
+        AudioClip se = Resources.Load<AudioClip>($"Sounds/Se/{soundName}");
         seAudio.PlayOneShot(se);
     }
 
@@ -53,7 +53,7 @@ public class SoundPresenter : MonoBehaviour, ISoundPlayer
         if (bgmAudio.clip?.name == soundName) return;
 
         bgmAudio.Stop();
-        AudioClip bgm = Resources.Load<AudioClip>($"Sound/Bgm/{soundName}");
+        AudioClip bgm = Resources.Load<AudioClip>($"Sounds/Bgm/{soundName}");
         bgmAudio.clip = bgm;
         bgmAudio.Play();
     }
@@ -64,7 +64,7 @@ public class SoundPresenter : MonoBehaviour, ISoundPlayer
     /// <param name="soundName"></param>
     public void PlayVoice(string soundName)
     {
-        AudioClip voice = Resources.Load<AudioClip>($"Sound/Voice/{soundName}");
+        AudioClip voice = Resources.Load<AudioClip>($"Sounds/Voice/{soundName}");
         voiceAudio.PlayOneShot(voice);
     }
 
