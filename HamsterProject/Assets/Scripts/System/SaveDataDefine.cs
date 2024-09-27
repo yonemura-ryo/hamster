@@ -11,5 +11,7 @@ public static class SaveData
         public const string UserCommonData = "UserCommonData";
         public const string HavingFoodData = "HavingFoodData";
         public const string HamsterExistData = "HamsterExistData";
+
+        public const string SoundVolume = "SoundVolume";
     }
 }

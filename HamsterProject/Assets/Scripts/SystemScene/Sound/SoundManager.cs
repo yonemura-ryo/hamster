@@ -45,12 +45,13 @@ public class SoundManager : MonoBehaviour
 /// <summary>
 /// Pass value to sound. 
 /// </summary>
+[System.Serializable]
 public class SoundVolume
 {
-    public float MasterVolume { private set; get; }
-    public float BgmVolume { private set; get; }
-    public float SeVolume { private set; get; }
-    public float VoiceVolume { private set; get; }
+    public float MasterVolume;
+    public float BgmVolume;
+    public float SeVolume;
+    // public float VoiceVolume { private set; get; }
 
     /// <summary>
     /// Constructor
@@ -59,11 +60,11 @@ public class SoundVolume
     /// <param name="bgmVolume"></param>
     /// <param name="seVolume"></param>
     /// <param name="voiceVolume"></param>
-    public SoundVolume(float masterVolume, float bgmVolume, float seVolume, float voiceVolume)
+    public SoundVolume(float masterVolume, float bgmVolume, float seVolume/*, float voiceVolume*/)
     {
         MasterVolume = masterVolume;
         BgmVolume = bgmVolume;
         SeVolume = seVolume;
-        VoiceVolume = voiceVolume;
+        // VoiceVolume = voiceVolume;
     }
 }

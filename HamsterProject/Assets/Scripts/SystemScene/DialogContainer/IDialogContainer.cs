@@ -10,5 +10,5 @@ public interface IDialogContainer
     /// </summary>
     /// <typeparam name="T">Dialog Base</typeparam>
     /// <returns></returns>
-    T Show<T>(Action closeAction) where T : DialogBase;
+    T Show<T>(Action closeAction = null) where T : DialogBase;
 }

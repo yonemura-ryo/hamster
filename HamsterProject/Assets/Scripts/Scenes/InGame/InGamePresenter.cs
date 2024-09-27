@@ -21,7 +21,7 @@ public class InGamePresenter : MonoBehaviour
     /// Initialize.
     /// </summary>
     /// <param name="inGameModel"></param>
-    public void Initialize(InGameModel inGameModel, IDialogContainer dialogContainer, int coinCount=0)
+    public void Initialize(InGameModel inGameModel, IDialogContainer dialogContainer, ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner, int coinCount=0)
     {
         this.inGameModel = inGameModel;
         this.dialogContainer = dialogContainer;
@@ -29,7 +29,8 @@ public class InGamePresenter : MonoBehaviour
 
         MenuButton.OnClickAsObservable().Subscribe(_ =>
         {
-            dialogContainer.Show<MenuDialog>(null);
+            MenuDialog menuDialog = dialogContainer.Show<MenuDialog>(null);
+            menuDialog.Initialize(dialogContainer, soundPlayer, sceneTransitioner);
         });
     }
 

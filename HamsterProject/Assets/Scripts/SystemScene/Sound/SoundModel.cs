@@ -10,7 +10,7 @@ public class SoundModel
     public float MasterVolume { get; private set; }
     public float BgmVolume { get;private set; }
     public float SeVolume { get; private set; }
-    public float VoiceVolume { get; private set; }
+    //public float VoiceVolume { get; private set; }
 
     /// <summary>
     /// Constructor.
@@ -21,7 +21,7 @@ public class SoundModel
         MasterVolume = volume.MasterVolume;
         BgmVolume = volume.BgmVolume;
         SeVolume = volume.SeVolume;
-        VoiceVolume = volume.VoiceVolume;
+        //VoiceVolume = volume.VoiceVolume;
     }
 
     /// <summary>
@@ -64,8 +64,8 @@ public class SoundModel
     /// <returns></returns>
     public float CalcVoiceVolume(float volume)
     {
-        VoiceVolume = CorrectionVolume(volume);
-        return VoiceVolume * SoundDefine.VoiceCorrenctionValue * MasterVolume;
+        //VoiceVolume = CorrectionVolume(volume);
+        return 0.0f; // VoiceVolume * SoundDefine.VoiceCorrenctionValue * MasterVolume;
     }
 
     /// <summary>
@@ -84,6 +84,6 @@ public class SoundModel
     /// <returns></returns>
     public SoundVolume GetSoundvolume()
     {
-        return new SoundVolume(MasterVolume, BgmVolume, SeVolume, VoiceVolume);
+        return new SoundVolume(MasterVolume, BgmVolume, SeVolume/*, VoiceVolume*/);
     }
 }

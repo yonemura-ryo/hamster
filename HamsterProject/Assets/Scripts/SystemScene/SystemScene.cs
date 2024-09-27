@@ -55,7 +55,14 @@ public class SystemScene : SingletonMonobehaviour<SystemScene>
         base.Awake();
         Awaker().Forget();
 
-        soundManager.Initialize(new SoundVolume(0.5f, 0.5f, 0.5f, 0.5f));
+
+        if (!LocalPrefs.IsExist(SaveData.Key.SoundVolume))
+        {
+            SoundVolume tmpVolume = new SoundVolume(0.5f, 0.5f, 0.5f);
+            LocalPrefs.Save(SaveData.Key.SoundVolume, tmpVolume);
+        }
+        SoundVolume volume = LocalPrefs.Load<SoundVolume>(SaveData.Key.SoundVolume);
+        soundManager.Initialize(volume);
         sceneTransitionManager.Initialize(null);
 
         SoundPlayer = soundManager.GetSoundPlayer();
