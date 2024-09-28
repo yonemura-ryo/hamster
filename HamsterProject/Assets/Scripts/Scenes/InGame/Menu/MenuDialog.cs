@@ -13,6 +13,10 @@ public class MenuDialog : DialogBase
     [SerializeField] CustomButton HowToButton  = null; // 遊び方
     [SerializeField] CustomButton SettingsButton  = null; // 設定
 
+    private IDialogContainer dialogContainer;
+    private ISoundPlayer soundPlayer;
+    private ISceneTransitioner sceneTransitioner;
+
     /// <summary>
     /// 
     /// </summary>
@@ -45,7 +49,9 @@ public class MenuDialog : DialogBase
 
         SettingsButton.OnClickAsObservable().Subscribe(_ =>
         {
-
+            SettingDialog settingDialog = dialogContainer?.Show<SettingDialog>(OnCloseNextDialog);
+            settingDialog?.Initialize(soundPlayer, sceneTransitioner);
+            gameObject.SetActive(false);
         }).AddTo(this);
     }
 
@@ -57,11 +63,23 @@ public class MenuDialog : DialogBase
         base.Show(closeAction);
     }
 
+    public void Initialize(IDialogContainer dialogContainer, ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner)
+    {
+        this.dialogContainer = dialogContainer;
+        this.soundPlayer = soundPlayer;
+        this.sceneTransitioner = sceneTransitioner;
+    }
+
     /// <summary>
     /// ダイアログを閉じる
     /// </summary>
     public override void Close()
     {
         base.Close();
+    }
+
+    private void OnCloseNextDialog()
+    {
+        gameObject.SetActive(true);
     }
 }

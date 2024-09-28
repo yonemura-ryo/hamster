@@ -46,12 +46,16 @@ public class DialogContainer : MonoBehaviour, IDialogContainer
             dialog.Show(() =>
             {
                 closeAction?.Invoke();
-                backGround.DOFade(0, AnimationTIme)
+                openDialogs.Remove(dialog);
+
+                if (openDialogs.Count <= 0)
+                {
+                    backGround.DOFade(0, AnimationTIme)
                     .OnComplete(() =>
                     {
                         backGround.gameObject.SetActive(false);
                     });
-                openDialogs.Remove(dialog);
+                }
             });
 
             backGround.gameObject.SetActive(true);

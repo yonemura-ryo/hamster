@@ -69,7 +69,8 @@ public class InGameController : SceneControllerBase
         // DebugAcquireFood(1, 5);
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
-        inGamePresenter.Initialize(model, dialogContainer, userCommonData.coinCount);
+        SystemScene systemScene = SystemScene.Instance;
+        inGamePresenter.Initialize(model, dialogContainer, systemScene.SoundPlayer, systemScene.SceneTransitioner, userCommonData.coinCount);
         // 施設の初期化
         foreach (var facilityData in facilityListData.facilities)
         {
@@ -229,7 +230,7 @@ public class InGameController : SceneControllerBase
     public void DebugClearPlayerPrefs()
     {
         // PlayerPrefs削除
-        PlayerPrefs.DeleteAll();
+        LocalPrefs.DeleteAll();
         // 初期化を走らせておく
         Initialize();
     }

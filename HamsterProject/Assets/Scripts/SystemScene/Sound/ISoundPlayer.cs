@@ -46,6 +46,12 @@ public interface ISoundPlayer
     /// <param name="volume">volume</param>
     void SetVoiceVolume(float volume);
 
+    /// <summary>
+    /// マスタ音量設定
+    /// </summary>
+    /// <param name="masterVolume"></param>
+    void SetMasterVolume(float volume);
+
     #endregion
 
     #region Stop Sound
@@ -105,13 +111,31 @@ public interface ISoundPlayer
 
     #endregion
 
-    #region other
+    #region Volume Getter
 
     /// <summary>
-    /// マスタ音量設定
+    /// マスターボリューム取得
     /// </summary>
-    /// <param name="masterVolume"></param>
-    void SetMasterVolume(float volume);
+    /// <returns></returns>
+    float GetMasterVolume();
+
+    /// <summary>
+    /// BGM音量取得
+    /// </summary>
+    /// <returns></returns>
+    float GetBgmVolume();
+
+    /// <summary>
+    /// SE音量取得
+    /// </summary>
+    /// <returns></returns>
+    float GetSeVolume();
+
+    /// <summary>
+    /// ボイス音量取得
+    /// </summary>
+    /// <returns></returns>
+    float GetVoiceVolume();
 
     #endregion
 }

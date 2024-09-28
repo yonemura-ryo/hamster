@@ -3270,7 +3270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.data[0]
@@ -3292,6 +3292,10 @@ PrefabInstance:
       propertyPath: dialogs.Array.data[4]
       value: 
       objectReference: {fileID: 5446245509212336025, guid: b7f2c2a8b9a727240b68770a55d3a802, type: 3}
+    - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
+      propertyPath: dialogs.Array.data[5]
+      value: 
+      objectReference: {fileID: 7851828309264464707, guid: 5068b811e7f062e44a54666379f5097d, type: 3}
     - target: {fileID: 4989339025704560640, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: m_IsActive
       value: 0

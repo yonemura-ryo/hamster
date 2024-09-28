@@ -9,6 +9,20 @@ using UnityEngine;
 public static class LocalPrefs
 {
     /// <summary>
+    /// ローカルデータ全て削除
+    /// </summary>
+    public static void DeleteAll()
+    {
+        PlayerPrefs.DeleteAll();
+    }
+
+    public static bool IsExist(string key)
+    {
+        string encKey = EncryptString.Encrypt(key);
+        return PlayerPrefs.HasKey(encKey);
+    }
+
+    /// <summary>
     /// int型のセーブ
     /// </summary>
     /// <param name="key"></param>
