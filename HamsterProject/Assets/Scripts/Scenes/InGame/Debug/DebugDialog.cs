@@ -15,6 +15,7 @@ public class DebugDialog : DialogBase
     [SerializeField] private Button removeCoinButton;
     [SerializeField] private Button clearDataButton;
     [SerializeField] private Button acquireFoodButton;
+    [SerializeField] private Button notificationButton;
 
     
     public void Initialize(Action<int> addCoin, Action clearData, Action<int,int> acquireFood)
@@ -28,7 +29,7 @@ public class DebugDialog : DialogBase
         removeCoinButton.onClick.AddListener(OnClickAddCoin);
         clearDataButton.onClick.AddListener(OnClickClearData);
         acquireFoodButton.onClick.AddListener(OnClickAcquireFood);
-
+        notificationButton.onClick.AddListener(OnClickNotification);
     }
 
     public void OnClickAddCoin()
@@ -56,5 +57,13 @@ public class DebugDialog : DialogBase
         acquireFood(3,5);
         acquireFood(4,5);
         acquireFood(5,5);
+    }
+
+    public void OnClickNotification()
+    {
+        // 10秒後に通知
+        LocalPushNotification.RegisterChannel("debugChannel", "PushTest", "デバッグ用の通知");
+        LocalPushNotification.AllClear();
+        LocalPushNotification.AddSchedule(" テストプッシュ通知", "[デバッグ用]通知時間になりました！", 1, 10, "debugChannel");
     }
 }
