@@ -17,15 +17,16 @@ public class Hamster : MonoBehaviour
     private string _imagePath;
     private string _fixedHamsterImagePath;
     private int _bugId = 0;
+    private float requireAppearTime = 0f;
     private float _requireBugfixTime = 0f;
+    private int bugFixReward = 0;
+
     private DateTime finishBugFixDatetime = DateTime.MinValue;
     private DialogContainer _dialogContainer;
     private RectTransform _rectTransform;
     private Action<int,string> _finishFixAction;
     private int _hamsterIndex = 0;
-    
-    private int _disappearCount = 0;
-    private Action<int> _disappearAction;
+    private bool isAppearBug = false;
 
 
     /// <summary>
@@ -37,20 +38,29 @@ public class Hamster : MonoBehaviour
     /// <param name="imagePath"></param>
     /// <param name="requireBugFixTime"></param>
     /// <param name="bugId"></param>
-    public void Initialize(int hamsterIndex, Transform position, Action<int,string> finishFixAction, string imagePath, float requireBugFixTime, int bugId, Action<int> disappearAction)
+    public void Initialize(
+        int hamsterIndex,
+        Transform position,
+        Action<int,string> finishFixAction,
+        string imagePath,
+        string normalImagePath,
+        int bugId,
+        float requireAppearTime,
+        float requireBugFixTime,
+        int bugFixReward
+        )
     {
         _hamsterIndex = hamsterIndex;
         _finishFixAction = finishFixAction;
         _imagePath = imagePath;
-        _fixedHamsterImagePath = imagePath;
-        _requireBugfixTime = requireBugFixTime;
+        _fixedHamsterImagePath = normalImagePath;
         _bugId = bugId;
+        this.requireAppearTime = requireAppearTime;
+        _requireBugfixTime = requireBugFixTime;
+        this.bugFixReward = bugFixReward;
         _rectTransform = GetComponent<RectTransform>();
         _rectTransform.localPosition = position.localPosition;
-        _disappearAction = disappearAction;
-        
         hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
-        MakeBug();
     }
     
     /// <summary>
@@ -79,43 +89,59 @@ public class Hamster : MonoBehaviour
     {
         return _bugId;
     }
+
+    /// <summary>
+    /// バグ修正報酬
+    /// </summary>
+    /// <returns></returns>
+    public int GetBugFixReward()
+    {
+        return bugFixReward;
+    }
     
     /// <summary>
     /// ハムスタータップ時処理
     /// </summary>
     public void OnClickHamster()
     {
-        // TODO 修正時間の操作系はManager側に移す（予定）
-        if (_bugId <= 0)
+        // バグ出現前
+        if (!isAppearBug)
         {
-            // TODO 通常ハムタップ時の動作検討
-            // 2回タップしたら消える
-            _disappearCount++;
-            if (_disappearCount >= 2)
-            {
-                _disappearAction?.Invoke(_hamsterIndex);
-            }
             return;
         }
+
+        // TODO 修正時間の操作系はManager側に移す（予定）
+
+        //if (_bugId <= 0)
+        //{
+        //    // TODO 通常ハムタップ時の動作検討
+        //    // 2回タップしたら消える
+        //    _disappearCount++;
+        //    if (_disappearCount >= 2)
+        //    {
+        //        _disappearAction?.Invoke(_hamsterIndex);
+        //    }
+        //    return;
+        //}
 
         // バグ修正開始前
         if (finishBugFixDatetime == DateTime.MinValue)
         {
+            
             // 終了日時を設定
             TimeSpan timeSpan = TimeSpan.FromSeconds(_requireBugfixTime);
             finishBugFixDatetime = DateTime.Now.Add(timeSpan);
             // バグ修正開始する
-            UpdateFixCountDownText();
+            UpdateFixCountDownText(_requireBugfixTime);
             // カウントダウンテキスト表示
-            fixCountDownText.gameObject.SetActive(true);
-            fixCountDownText.enabled = true;
+            InitalizeCountDonwText(Color.white);
                 
             DOTween.To(() => _requireBugfixTime, x => _requireBugfixTime = x, 0f, _requireBugfixTime)
                 .SetEase(Ease.Linear)    
                 .OnUpdate(() =>
                 {
                     // 現在のカウントダウン秒数から、日時を生成して表示
-                    UpdateFixCountDownText();
+                    UpdateFixCountDownText(_requireBugfixTime);
                 })
                 .OnComplete(() =>
                 {
@@ -134,8 +160,7 @@ public class Hamster : MonoBehaviour
             // TODO 元のハムスター表示に戻す処理
             hamsterImage.color = Color.white;
             hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
-            fixCountDownText.gameObject.SetActive(false);
-            fixCountDownText.enabled = false;
+            InitalizeCountDonwText(Color.white,false);
             _finishFixAction(_hamsterIndex, GetFixedHamsterImagePath());
             return;
         }
@@ -144,18 +169,41 @@ public class Hamster : MonoBehaviour
         // TODO 短縮ダイアログ出す
         return;
     }
-    
+
+    /// <summary>
+    /// ハムスターをシルエット表示
+    /// </summary>
+    public void MakeSilhouette()
+    {
+        hamsterImage.color = Color.black;
+        // カウントダウンテキスト表示
+        //fixCountDownText.gameObject.SetActive(true);
+        //fixCountDownText.enabled = true;
+        InitalizeCountDonwText(Color.white);
+        //DOTween.To(() =>  requireAppearTime, x => requireAppearTime = x, 0f, requireAppearTime)
+        //        .SetEase(Ease.Linear)
+        //        .OnUpdate(() =>
+        //        {
+        //            // 現在のカウントダウン秒数から、日時を生成して表示
+        //            UpdateFixCountDownText();
+        //        });
+    }
+
     /// <summary>
     /// ハムスターのバグ見た目生成
     /// TODO バグの種類が未確定のため、内容によって実装する
     /// </summary>
-    private void MakeBug()
+    public void MakeBug()
     {
+        isAppearBug = true;
+        InitalizeCountDonwText(Color.white, false);
+        hamsterImage.color = Color.white;
         switch (_bugId)
         {
             case 0:
-                break;
             case 1:
+            case 2:
+            case 3:
                 // TODO 仮　色を変える
                 hamsterImage.color = Color.red;
                 break;
@@ -163,13 +211,25 @@ public class Hamster : MonoBehaviour
                 break;
         }
     }
+
+    /// <summary>
+    /// カウントダウンテキストの初期化
+    /// </summary>
+    /// <param name="textColor"></param>
+    /// <param name="isActive"></param>
+    private void InitalizeCountDonwText(Color textColor, bool isActive = true)
+    {
+        fixCountDownText.gameObject.SetActive(isActive);
+        fixCountDownText.enabled = isActive;
+        fixCountDownText.color = textColor;
+    }
     
     /// <summary>
     /// 残り時間表示の更新
     /// </summary>
-    private void UpdateFixCountDownText()
+    public void UpdateFixCountDownText(float countDownTime)
     {
-        TimeSpan timeSpan = TimeSpan.FromSeconds(_requireBugfixTime);
+        TimeSpan timeSpan = TimeSpan.FromSeconds(countDownTime);
         fixCountDownText.text = timeSpan.ToString("mm':'ss");
     }
 }

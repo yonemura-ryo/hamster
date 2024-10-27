@@ -14,6 +14,7 @@ public class InGamePresenter : MonoBehaviour
     private IDialogContainer dialogContainer;
     
     [SerializeField] private TextMeshProUGUI coinText;
+    [SerializeField] private TextMeshProUGUI rankText;
 
     [SerializeField] private CustomButton MenuButton = null;
 
@@ -21,11 +22,12 @@ public class InGamePresenter : MonoBehaviour
     /// Initialize.
     /// </summary>
     /// <param name="inGameModel"></param>
-    public void Initialize(InGameModel inGameModel, IDialogContainer dialogContainer, ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner, int coinCount=0)
+    public void Initialize(InGameModel inGameModel, IDialogContainer dialogContainer, ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner, int coinCount=0, int rank=1)
     {
         this.inGameModel = inGameModel;
         this.dialogContainer = dialogContainer;
         UpdateCoinText(coinCount);
+        UpdateRankText(rank);
 
         MenuButton.OnClickAsObservable().Subscribe(_ =>
         {
@@ -41,5 +43,10 @@ public class InGamePresenter : MonoBehaviour
     public void UpdateCoinText(int coinCount)
     {
         coinText.text = coinCount.ToString();
+    }
+
+    public void UpdateRankText(int rank)
+    {
+        rankText.text = rank.ToString();
     }
 }

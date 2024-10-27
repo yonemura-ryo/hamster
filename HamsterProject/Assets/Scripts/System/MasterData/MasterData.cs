@@ -27,14 +27,20 @@ public partial class MasterDataDB
 {
     /// <summary> m_hamster公開用 </summary>
     public IReadOnlyDictionary<int, HamsterMaster> HamsterMaster => hamsterMaster;
+    public IReadOnlyDictionary<int, HamsterBugMaster> HamsterBugMaster => hamsterBugMaster;
+    public IReadOnlyDictionary<string, HamsterColorTypeMaster> HamsterColorTypeMaster => hamsterColorTypeMaster;
     public IReadOnlyDictionary<int, FacilityMaster> FacilityMaster => facilityMaster;
     public IReadOnlyDictionary<string, FacilityLevelMaster> FacilityLevelMaster => facilityLevelMaster;
     public IReadOnlyDictionary<int, FoodMaster> FoodMaster => foodMaster;
+    public IReadOnlyDictionary<int, UserRankMaster> UserRankMaster => userRankMaster;
 
     private Dictionary<int, HamsterMaster> hamsterMaster;
+    private Dictionary<int, HamsterBugMaster> hamsterBugMaster;
+    private Dictionary<string, HamsterColorTypeMaster> hamsterColorTypeMaster;
     private Dictionary<int, FacilityMaster> facilityMaster;
     private Dictionary<string, FacilityLevelMaster> facilityLevelMaster;
     private Dictionary<int, FoodMaster> foodMaster;
+    private Dictionary<int, UserRankMaster> userRankMaster;
 
     /// <summary>
     /// Constructor.
@@ -42,9 +48,12 @@ public partial class MasterDataDB
     public MasterDataDB()
     {
         hamsterMaster = GetHamsterMaster(MasterDefine.Name.HamsterMaster);
+        hamsterBugMaster = GetHamsterBugMaster(MasterDefine.Name.HamsterBugMaster);
+        hamsterColorTypeMaster = GetHamsterColorTypeMaster(MasterDefine.Name.HamsterColorTypeMaster);
         facilityMaster = GetFacilityMaster(MasterDefine.Name.FacilityMaster);
         facilityLevelMaster = GetFacilityLevelMaster(MasterDefine.Name.FacilityLevelMaster);
         foodMaster = GetFoodMaster(MasterDefine.Name.FoodMaster);
+        userRankMaster = GetUserRankMaster(MasterDefine.Name.UserRankMaster);
     }
 
     /// <summary>

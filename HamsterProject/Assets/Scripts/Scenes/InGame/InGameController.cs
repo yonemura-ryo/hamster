@@ -21,6 +21,7 @@ public class InGameController : SceneControllerBase
     /// </summary>
     private IReadOnlyDictionary<int, FacilityMaster> FacilityMaster = null;
     private IReadOnlyDictionary<int, FoodMaster> FoodMaster = null;
+    private IReadOnlyDictionary<int, UserRankMaster> UserRankMaster = null;
     
     /// <summary>
     /// セーブデータ
@@ -42,6 +43,7 @@ public class InGameController : SceneControllerBase
         // マスターデータの読み込み
         FacilityMaster = MasterData.DB.FacilityMaster;
         FoodMaster = MasterData.DB.FoodMaster;
+        UserRankMaster = MasterData.DB.UserRankMaster;
 
         // ユーザーデータの読み込み
         userCommonData =  LocalPrefs.Load<UserCommonData>(SaveData.Key.UserCommonData);
@@ -50,6 +52,8 @@ public class InGameController : SceneControllerBase
         {
             userCommonData = new UserCommonData();
             userCommonData.coinCount = 0;
+            userCommonData.exp = 0;
+            userCommonData.userRank = 1;
             LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
         }
         // 施設データの読み込み
@@ -70,9 +74,9 @@ public class InGameController : SceneControllerBase
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         SystemScene systemScene = SystemScene.Instance;
-        inGamePresenter.Initialize(model, dialogContainer, systemScene.SoundPlayer, systemScene.SceneTransitioner, userCommonData.coinCount);
+        inGamePresenter.Initialize(model, dialogContainer, systemScene.SoundPlayer, systemScene.SceneTransitioner, userCommonData.coinCount, userCommonData.userRank);
         // 施設の初期化
-        foreach (var facilityData in facilityListData.facilities)
+        foreach ((int key,FacilityData facilityData) in facilityListData.facilityDictionary)
         {
             // facilityIdが不正値の場合はスキップ
             if(facilityData.facilityId <= 0){continue;}
@@ -92,7 +96,7 @@ public class InGameController : SceneControllerBase
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
         }
         // ハムの初期化
-        hamsterManager.Initialize(foodAreas,AddCoin,ConsumeFood);
+        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp);
     }
 
     /// <summary>
@@ -103,13 +107,13 @@ public class InGameController : SceneControllerBase
     {
         FacilityListData facilityListData = new FacilityListData();
         // TODO マスタから施設数をとる
-        facilityListData.facilities = new FacilityData[facilityCount + 1];
+        facilityListData.facilityDictionary = new SerializableDictionary<int, FacilityData>();
         for (int i = 0; i < facilityCount; i++)
         {
             FacilityData facilityData = new FacilityData();
             facilityData.facilityId = i + 1;
             facilityData.level = 0;
-            facilityListData.facilities[facilityData.facilityId] = facilityData;
+            facilityListData.facilityDictionary[facilityData.facilityId] = facilityData;
         }
         
         LocalPrefs.Save(SaveData.Key.FacilityList, facilityListData);
@@ -134,6 +138,55 @@ public class InGameController : SceneControllerBase
     }
 
     /// <summary>
+    /// 経験値付与
+    /// </summary>
+    /// <param name="addExp"></param>
+    public void AddExp(int addExp)
+    {
+        userCommonData.exp += addExp;
+        // ユーザーランク上昇判定
+        bool isRankUp = true;
+        List<int> functonReleaseIds = new List<int>();
+        while (isRankUp)
+        {
+            if (UserRankMaster.ContainsKey(userCommonData.userRank + 1))
+            {
+                UserRankMaster nextRankMaster = UserRankMaster[userCommonData.userRank + 1];
+                if(nextRankMaster.Exp <= userCommonData.exp)
+                {
+                    // レベル上昇
+                    userCommonData.userRank = nextRankMaster.Rank;
+                    if(nextRankMaster.FunctionReleaseId > 0)
+                    {
+                        functonReleaseIds.Add(nextRankMaster.FunctionReleaseId);
+                    }
+                }
+                else
+                {
+                    // 経験値未達
+                    isRankUp = false;
+                }
+            }
+            else
+            {
+                // 次のランクがない = 最大レベルとみなし経験値上限張りつきにする
+                UserRankMaster currentRankMaster = UserRankMaster[userCommonData.userRank];
+                userCommonData.exp = currentRankMaster.Exp;
+                isRankUp = false;
+            }
+        }
+        // TODO ユーザーランク上昇通知ダイアログ
+        inGamePresenter.UpdateRankText(userCommonData.userRank);
+        // TODO 機能解放実行処理
+        foreach (var functionReleaseId in functonReleaseIds)
+        {
+            //
+        }
+        // ユーザーデータセーブ
+        LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
+    }
+
+    /// <summary>
     /// 施設レベルアップ
     /// </summary>
     /// <param name="facilityId"></param>
@@ -146,11 +199,11 @@ public class InGameController : SceneControllerBase
         // コイン消費
         AddCoin(-spendCoin);
         // 施設レベルアップ
-        facilityListData.facilities[facilityId].level++;
+        facilityListData.facilityDictionary[facilityId].level++;
         // 施設データセーブ
         LocalPrefs.Save(SaveData.Key.FacilityList, facilityListData);
         // facilityの変数更新
-        facilities[facilityId -1].UpdateMemberValue(facilityListData.facilities[facilityId].level);
+        facilities[facilityId -1].UpdateMemberValue(facilityListData.facilityDictionary[facilityId].level);
         return true;
     }
     
@@ -165,7 +218,7 @@ public class InGameController : SceneControllerBase
             facilityId,
             FacilityMaster[facilityId].Name,
             FacilityMaster[facilityId].LevelType,
-            facilityListData.facilities[facilityId].level,
+            facilityListData.facilityDictionary[facilityId].level,
             facilities[facilityId -1].FacilitySprite,
             UpdateFacilityLevel
             );
@@ -220,7 +273,8 @@ public class InGameController : SceneControllerBase
         debugDialog.Initialize(
             AddCoin,
             DebugClearPlayerPrefs,
-            DebugAcquireFood
+            DebugAcquireFood,
+            AddExp
             );
     }
 

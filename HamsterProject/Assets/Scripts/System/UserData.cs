@@ -18,7 +18,7 @@ public class FacilityData
 [System.Serializable]
 public class FacilityListData
 {
-    public FacilityData[] facilities;
+    public SerializableDictionary<int,FacilityData> facilityDictionary;
 }
 
 /// <summary>
@@ -60,8 +60,9 @@ public class HamsterExistData
 public class UserCommonData
 {
     public int coinCount;
+    public int exp;
+    public int userRank;
 }
-
 
 
 [System.Serializable]
