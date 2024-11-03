@@ -26,10 +26,10 @@ public class InGameController : SceneControllerBase
     /// <summary>
     /// セーブデータ
     /// </summary>
-    // TODO 一時的[SerializeField] 外す
+    // TODO 一時的。[SerializeField] 外す
     [SerializeField] private FacilityListData facilityListData = null;
     private UserCommonData userCommonData = null;
-    // TODO 一時的[SerializeField] 外す
+    // TODO 一時的。[SerializeField] 外す
     [SerializeField] private HavingFoodData havingFoodData = null;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>

@@ -40,13 +40,23 @@ public class HavingFoodData
     public SerializableDictionary<int , FoodData> havingFoodDictionary;
 }
 
+/// <summary>
+/// 出現中ハムスター1体ごとのデータ
+///
+/// 初期出現時：[bugAppearTime,bugFixTime] = [出現予定時刻, DateTime.MaxValue]
+/// バグ修正開始後：[bugAppearTime,bugFixTime] = [出現予定時刻, 修正完了予定時刻]
+/// </summary>
 [System.Serializable]
 public class HamsterData
 {
     public int hamsterId;
-    public DateTime bugFixTime;
+    public string bugAppearTime;
+    public string bugFixTime;
 }
 
+/// <summary>
+/// 出現中ハムスターデータ
+/// </summary>
 [System.Serializable]
 public class HamsterExistData
 {
