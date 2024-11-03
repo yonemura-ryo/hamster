@@ -23,7 +23,7 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 通常ハムスター出現確率
     /// </summary>
-    [SerializeField] private int normalHamsterAppearLottery = 20;
+    //[SerializeField] private int normalHamsterAppearLottery = 20;
     /// <summary>
     /// ハムスターを描画するキャンバス
     /// </summary>
@@ -39,11 +39,18 @@ public class HamsterManager : MonoBehaviour
     [SerializeField] private DialogContainer dialogContainer = null;
     
     private int itemPositionNum = 3;
-    private int bugHumsterNum = 1;
+    //private int bugHumsterNum = 1;
     private Action<int> addCoin = null;
     private Action<int> consumeFood = null;
+    private Action<int> addExp = null;
     
     public Dictionary<int, Hamster> hamsterList = new Dictionary<int, Hamster>();
+    /// <summary>
+    /// ハムスターの購読処理管理
+    /// 　・出現前（シルエット表示）：出現までのカウントダウン
+    /// 　・バグ修正中：修正までのカウントダウン
+    /// </summary>
+    public Dictionary<int, IDisposable> hamsterIDisposableList = new Dictionary<int, IDisposable>();
     private List<FoodArea> foodAreaList = new List<FoodArea>();
     
     /// <summary>
@@ -75,12 +82,13 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(List<FoodArea> foodAreaList, Action<int> addCoin, Action<int> consumeFood)
+    public void Initialize(List<FoodArea> foodAreaList, Action<int> addCoin, Action<int> consumeFood, Action<int> addExp)
     {
         // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
         this.foodAreaList = foodAreaList;
         this.addCoin = addCoin;
         this.consumeFood = consumeFood;
+        this.addExp = addExp;
         // ハム存在データの読み込み
         hamsterExistData = LocalPrefs.Load<HamsterExistData>(SaveData.Key.HamsterExistData);
         if (hamsterExistData == null)
@@ -97,7 +105,7 @@ public class HamsterManager : MonoBehaviour
         foreach ((int areaIndex, HamsterData hamsterData) in hamsterExistData.hamsterExistDictionary)
         {
             HamsterMaster hamsterMasterData = MasterData.DB.HamsterMaster[hamsterData.hamsterId];
-            HamsterInstantiate(hamsterMasterData, areaIndex, false);
+            HamsterInstantiate(hamsterMasterData, areaIndex, hamsterData, false);
         }
         // ハムスター出現処理
         HamsterAppear();
@@ -105,8 +113,6 @@ public class HamsterManager : MonoBehaviour
         Observable.Interval(TimeSpan.FromSeconds(appearInterval))
             .Subscribe(x =>
             {
-                // Debug.Log("Interval Time : " + Time.time + ", No : " + x.ToString() +
-                //           ", ThreadID : " + System.Threading.Thread.CurrentThread.ManagedThreadId);
                 HamsterAppear();
             })
             .AddTo(this);
@@ -140,20 +146,6 @@ public class HamsterManager : MonoBehaviour
                 consumeFood(areaIndex);
                 continue;
             }
-
-            // バグハムスターが存在する
-            if (IsExistBugHamster())
-            {
-                // TODO 抽選確率の調整
-                Random random = new Random();
-                int lottery = random.Next(0,100);
-                if(lottery >= normalHamsterAppearLottery){continue;}
-
-                // 通常ハムスター出現
-                HamsterMaster normalHamsterMaster = LotteryNormalHamster();
-                HamsterInstantiate(normalHamsterMaster, areaIndex);
-                continue;
-            }
         }
     }
 
@@ -161,45 +153,129 @@ public class HamsterManager : MonoBehaviour
     /// ハムスターの生成
     /// </summary>
     /// <param name="hamsterMasterData"></param>
-    /// <param name="areaIndex"></param>
-    /// <param name="bNeedSave"></param>
-    private void HamsterInstantiate(HamsterMaster hamsterMasterData, int areaIndex, bool bNeedSave=true)
+    /// <param name="areaIndex">出現するインデックス</param>
+    /// <param name="hamsterSaveData">生成に使用するセーブデータ</param>
+    /// <param name="bNeedSave">TODO セーブするかフラグ。いらない気がする</param>
+    private void HamsterInstantiate(HamsterMaster hamsterMasterData, int areaIndex, HamsterData hamsterSaveData=null, bool bNeedSave=true)
     {
         GameObject hamsterObject = Instantiate(hamsterPrefab);
         hamsterObject.transform.SetParent(hamstersCanvas.transform);
         Hamster hamster = hamsterObject.GetComponent<Hamster>();
+        // バグ出現時間
+        float bugAppearTime = hamsterMasterData.BugAppearTime;
+        float bugFixTime = hamsterMasterData.BugFixTime;
+        bool isStartFix = false;
+        if(hamsterSaveData != null)
+        {
+            TimeSpan bugAppearTimeSpan = DateTime.Parse(hamsterSaveData.bugAppearTime) - DateTime.Now;
+            bugAppearTime = bugAppearTimeSpan.Seconds;
+            // 修正開始後か？
+            if (hamsterSaveData.bugFixTime != DateTime.MaxValue.ToString())
+            {
+                isStartFix = true;
+                TimeSpan bugFixTimeSpan = DateTime.Parse(hamsterSaveData.bugFixTime) - DateTime.Now;
+                bugFixTime = bugFixTimeSpan.Seconds;
+            }
+        }
         hamster.Initialize(
             areaIndex,
             itemPositions[areaIndex],
             ShowDialogByFixedHamster,
             hamsterMasterData.ImagePath,
-            // TODO 修正時間をセーブデータからの参照に切り替え
-            hamsterMasterData.BugFixTime,
+            hamsterMasterData.NormalImagePath,
             hamsterMasterData.BugId,
-            DisappearHamster);
+            bugFixTime,
+            hamsterMasterData.BugFixReward,
+            (index, bugFixTime) => StartHamsterBugFix(index, bugFixTime)
+            );
         // 出現中ハムスター管理
         hamsterList[areaIndex] = hamster;
-
-        // 通常ハムスターなら自動で帰る
-        if (hamsterMasterData.BugId == 0)
+        // ハムスターの状態を設定
+        if (bugAppearTime > 0)
         {
-            Random random = new Random();
-            int lottery = random.Next(5,10);
-            Observable.Timer (TimeSpan.FromMilliseconds (lottery * 1000))
-                .Subscribe (delay => {
-                    DisappearHamster(areaIndex);
+            // 出現前処理
+            hamster.MakeSilhouette();
+            TimeSpan timeSpan = TimeSpan.FromSeconds(bugAppearTime);
+            IDisposable hamsterAppear = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1))
+                .TakeUntil(Observable.Timer(timeSpan))
+                .Subscribe(delay =>
+                {
+                    hamster.UpdateFixCountDownText(bugAppearTime - delay - 1);
+                },
+                () =>
+                {
+                    hamster.MakeBug();
                 })
                 .AddTo(hamster);
+            hamsterIDisposableList[areaIndex] = hamsterAppear;
+        }
+        else if (!isStartFix)
+        {
+            // 出現済みバグ修正開始前
+            hamster.MakeBug();
+        }
+        else
+        {
+            // バグ修正開始済み
+            hamster.MakeBugFixing();
+            StartHamsterBugFix(areaIndex, bugFixTime, false);
         }
         
-        if (bNeedSave) {
+                
+        if (bNeedSave && (hamsterSaveData == null)) {
             // セーブ
             HamsterData hamsterData = new HamsterData();
             hamsterData.hamsterId = hamsterMasterData.HamsterId;
-            hamsterData.bugFixTime = DateTime.Now.Add(TimeSpan.FromSeconds(hamsterMasterData.BugFixTime));
+            hamsterData.bugFixTime = DateTime.MaxValue.ToString();
+            hamsterData.bugAppearTime = DateTime.Now.Add(TimeSpan.FromSeconds(bugAppearTime)).ToString();
             hamsterExistData.hamsterExistDictionary.Add(areaIndex, hamsterData);
             LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);
         }
+    }
+
+    /// <summary>
+    /// ハムスターバグ修正開始
+    /// </summary>
+    /// <param name="hamsterIndex"></param>
+    /// <param name="bugFixTime"></param>
+    public void StartHamsterBugFix(int hamsterIndex, float bugFixTime, bool bNeedSave=true)
+    {
+        Hamster hamster = hamsterList[hamsterIndex];
+
+        TimeSpan timeSpan = TimeSpan.FromSeconds(bugFixTime);
+        IDisposable hamsterBugFix = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1))
+            .TakeUntil(Observable.Timer(timeSpan))
+            .Subscribe(delay =>
+            {
+                hamster.UpdateFixCountDownText(bugFixTime - delay - 1);
+            },
+            () =>
+            {
+                hamster.MakeBugFixed();
+            })
+            .AddTo(hamster);
+        // TODO 古いIDisposableを消す
+        hamsterIDisposableList[hamsterIndex] = hamsterBugFix;
+
+        // セーブ
+        if (bNeedSave)
+        {
+            HamsterData hamsterData = hamsterExistData.hamsterExistDictionary[hamsterIndex];
+            hamsterData.bugFixTime = DateTime.Now.Add(TimeSpan.FromSeconds(bugFixTime)).ToString();
+            hamsterExistData.hamsterExistDictionary[hamsterIndex] = hamsterData;
+            LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);
+
+        }
+    }
+
+    /// <summary>
+    /// ハムスター修理時間短縮ダイアログ
+    /// </summary>
+    /// <param name="hamsterIndex"></param>
+    public void ShowDialogByShortenFix(int hamsterIndex)
+    {
+        //
+
     }
     
     /// <summary>
@@ -208,40 +284,17 @@ public class HamsterManager : MonoBehaviour
     public void ShowDialogByFixedHamster(int hamsterIndex, string imagePath)
     {
         HamsterFixedDialog hamsterFixedDialog = dialogContainer.Show<HamsterFixedDialog>();
+        int rewardCoin = hamsterList[hamsterIndex].GetBugFixReward();
         GameObject hamster = hamsterList[hamsterIndex].gameObject;
         hamsterList.Remove(hamsterIndex);
         hamsterFixedDialog.SetHamsterImage(Resources.Load<Sprite>(imagePath));
         Destroy(hamster);
-        // TODO マスタからハムの金額参照
-        addCoin?.Invoke(100);
+        // ハム修正報酬コイン獲得
+        addCoin?.Invoke(rewardCoin);
+        addExp?.Invoke(1);
         // セーブ
         hamsterExistData.hamsterExistDictionary.Remove(hamsterIndex);
         LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);
-    }
-
-    /// <summary>
-    /// ハムスターの消え去り
-    /// </summary>
-    /// <param name="hamsterIndex"></param>
-    public void DisappearHamster(int hamsterIndex)
-    {
-        GameObject hamster = hamsterList[hamsterIndex].gameObject;
-        hamsterList.Remove(hamsterIndex);
-        Destroy(hamster);
-        // セーブ
-        hamsterExistData.hamsterExistDictionary.Remove(hamsterIndex);
-        LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);
-    }
-
-    /// <summary>
-    /// 通常ハムスターの抽選
-    /// </summary>
-    /// <returns></returns>
-    private HamsterMaster LotteryNormalHamster()
-    {
-        // TODO 通常ハムスターの抽選ロジック
-        int normalHamsterId = 1;
-        return hamsterMaster[normalHamsterId];
     }
 
     /// <summary>
@@ -251,24 +304,9 @@ public class HamsterManager : MonoBehaviour
     private HamsterMaster LotteryBugHamster()
     {
         // TODO バグハムスターの抽選ロジック
-        int bugHamsterId = 2;
+        Random random = new Random();
+        int lottery = random.Next(1,3);
+        int bugHamsterId = lottery;
         return hamsterMaster[bugHamsterId];
-    }
-
-    /// <summary>
-    /// バグハムスターが1匹でも存在するか
-    /// </summary>
-    /// <returns></returns>
-    private bool IsExistBugHamster()
-    {
-        foreach (var hamsterDictionary in hamsterList)
-        {
-            Hamster hamster = hamsterDictionary.Value;
-            if (hamster.GetHamsterBugId() > 0)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }

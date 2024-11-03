@@ -1,5 +1,5 @@
-hamster_id,name,image_path,bug_id,bug_fix_time
-,,,,
-1,a,Bugstar_Sample,0,0
-2,b,Bugstar_Sample,1,10
-3,c,Bugstar_Sample,0,0
+hamster_id,rare,name,image_path,normal_image_path,bug_id,bug_appear_time,bug_fix_time,bug_fix_reward,appear_release_id,color_type_id
+,,,,,,,,,,
+1,1,ハムA,Bugstar_Sample,Bugstar_Sample,1,3,10,10,0,1
+2,2,ハムB,Bugstar_Sample,Bugstar_Sample,2,5,60,100,0,1
+3,3,ハムC,Bugstar_Sample,Bugstar_Sample,3,60,60,1000,0,1

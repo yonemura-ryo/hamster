@@ -10,26 +10,30 @@ public class DebugDialog : DialogBase
     private Action<int> addCoin = null;
     private Action clearData = null;
     private Action<int,int> acquireFood = null;
+    private Action<int> addExp = null;
     
     [SerializeField] private Button addCoinButton;
     [SerializeField] private Button removeCoinButton;
     [SerializeField] private Button clearDataButton;
     [SerializeField] private Button acquireFoodButton;
     [SerializeField] private Button notificationButton;
+    [SerializeField] private Button addExpButton;
 
     
-    public void Initialize(Action<int> addCoin, Action clearData, Action<int,int> acquireFood)
+    public void Initialize(Action<int> addCoin, Action clearData, Action<int,int> acquireFood, Action<int> addExp)
     {
         this.addCoin = addCoin;
         this.clearData = clearData;
         this.acquireFood = acquireFood;
-        
+        this.addExp = addExp;
+
         // ボタンイベント
         addCoinButton.onClick.AddListener(OnClickAddCoin);
         removeCoinButton.onClick.AddListener(OnClickAddCoin);
         clearDataButton.onClick.AddListener(OnClickClearData);
         acquireFoodButton.onClick.AddListener(OnClickAcquireFood);
         notificationButton.onClick.AddListener(OnClickNotification);
+        addExpButton.onClick.AddListener(OnClickAddExp);
     }
 
     public void OnClickAddCoin()
@@ -65,5 +69,11 @@ public class DebugDialog : DialogBase
         LocalPushNotification.RegisterChannel("debugChannel", "PushTest", "デバッグ用の通知");
         LocalPushNotification.AllClear();
         LocalPushNotification.AddSchedule(" テストプッシュ通知", "[デバッグ用]通知時間になりました！", 1, 10, "debugChannel");
+    }
+
+    public void OnClickAddExp()
+    {
+        // 経験値100追加する
+        addExp(100);
     }
 }
