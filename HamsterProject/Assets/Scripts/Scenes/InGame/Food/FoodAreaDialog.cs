@@ -27,7 +27,7 @@ public class FoodAreaDialog : DialogBase
         {
             
             int id = havingFood.foodId;
-            Debug.Log(id + ":" +  havingFood.count);
+            //Debug.Log(id + ":" +  havingFood.count);
             GameObject foodContentObject =  Instantiate(foodContentPrefab, Vector3.zero, Quaternion.identity, scrollViewContentTransform);
             foodContentObject.GetComponent<FoodContent>().Initialize(
                 havingFood.foodId,

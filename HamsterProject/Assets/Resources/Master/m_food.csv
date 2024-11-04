@@ -1,7 +1,7 @@
-food_id,name,price,duration
-,,購入金額,持続時間(秒)
-1,ひまわりの種,10,3
-2,ペレット,50,10
-3,完全食,500,3600
-4,チーズ,1000,3600
-5,バナナ,10000,3600
+food_id,name,image_path,description,price,duration,effect_id
+,,,,購入金額,持続時間(秒),
+1,ひまわりの種,food_1,<color=red>ちょっと</color>バグハムが集まりやすい,10,10,1
+2,ペレット,food_2,<color=red>すこし</color>バグハムが集まりやすい,50,60,1
+3,完全食,food_3,<color=red>とても</color>バグハムが集まりやすい,500,3600,1
+4,チーズ,food_4,<color=red>すごく</color>バグハムが集まりやすい,1000,3600,1
+5,バナナ,food_5,<color=red>ものすごく</color>バグハムが集まりやすい,10000,3600,1

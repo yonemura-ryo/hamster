@@ -119,8 +119,11 @@ public partial class MasterDataDB
             result.Add(Id, new FoodMaster(
                 Id,
                 line[1],
-                int.Parse(line[2]),
-                float.Parse(line[3])
+                line[2],
+                line[3],
+                int.Parse(line[4]),
+                float.Parse(line[5]),
+                int.Parse(line[6])
             ));
         }
 
