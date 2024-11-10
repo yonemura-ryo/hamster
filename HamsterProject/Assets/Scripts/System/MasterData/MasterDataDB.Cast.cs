@@ -83,7 +83,9 @@ public partial class MasterDataDB
             result.Add(Id, new FacilityMaster(
                 Id,
                 line[1],
-                int.Parse(line[2])
+                line[2],
+                line[3],
+                int.Parse(line[4])
             ));
         }
 
@@ -101,7 +103,8 @@ public partial class MasterDataDB
             result.Add(Id + ":" + Level, new FacilityLevelMaster(
                 int.Parse(Id),
                 int.Parse(Level),
-                int.Parse(line[2])
+                int.Parse(line[2]),
+                line[3]
             ));
         }
 

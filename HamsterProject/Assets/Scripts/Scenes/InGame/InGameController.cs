@@ -27,6 +27,7 @@ public class InGameController : SceneControllerBase
     /// [セーブデータ]施設データ
     /// </summary>
     private FacilityListData facilityListData = null;
+    public FacilityListData FacilityListDataReadOnly => facilityListData;
     /// <summary>
     /// [セーブデータ]ユーザー基本データ
     /// </summary>
@@ -90,7 +91,9 @@ public class InGameController : SceneControllerBase
             systemScene.SceneTransitioner,
             userCommonDataReadOnly,
             AddCoin,
-            AcquireFood
+            AcquireFood,
+            FacilityListDataReadOnly,
+            UpdateFacilityLevel
             );
         // 施設の初期化
         foreach ((int key,FacilityData facilityData) in facilityListData.facilityDictionary)

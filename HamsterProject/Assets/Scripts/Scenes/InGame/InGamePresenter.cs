@@ -31,7 +31,9 @@ public class InGamePresenter : MonoBehaviour
         ISceneTransitioner sceneTransitioner,
         UserCommonData userCommonData,
         Action<int> acquireCoin,
-        Action<int, int> acquireFood
+        Action<int, int> acquireFood,
+        FacilityListData facilityListData,
+        Func<int,int, bool>updateFacilityLevel
         )
     {
         this.inGameModel = inGameModel;
@@ -54,7 +56,9 @@ public class InGamePresenter : MonoBehaviour
                 {
                     acquireCoin?.Invoke(-price);
                     acquireFood?.Invoke(foodId, count);
-                }
+                },
+                facilityListData,
+                updateFacilityLevel
                 );
         }).AddTo(this);
     }
