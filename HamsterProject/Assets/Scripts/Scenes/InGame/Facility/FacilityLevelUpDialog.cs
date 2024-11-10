@@ -8,7 +8,6 @@ using System.Collections.Generic;
 public class FacilityLevelUpDialog : DialogBase
 {
     private int facilityId = 0;
-    private string facilityName = "";
     private int facilityLevelType = 0;
     private int facilityLevel = 0;
     private IReadOnlyDictionary<string, FacilityLevelMaster> FacilityLevelMaster = null;

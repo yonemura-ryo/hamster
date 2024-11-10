@@ -1,5 +1,5 @@
-facility_id,name,level_type
-,,
-1,まわしくるま,1
-2,すべりだい,1
-3,みず,2
+facility_id,name,image_path,description,level_type
+,,,{%} はreplace_textに置換される,
+1,まわしくるま,rat_race_businessman,A時間が<color=red>{%}</color>短縮,1
+2,すべりだい,suberidai,B時間が<color=red>{%}</color>短縮,1
+3,みず,drink_water_server,C時間が<color=red>{%}</color>短縮,2

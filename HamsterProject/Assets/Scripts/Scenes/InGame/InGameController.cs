@@ -24,13 +24,23 @@ public class InGameController : SceneControllerBase
     private IReadOnlyDictionary<int, UserRankMaster> UserRankMaster = null;
     
     /// <summary>
-    /// セーブデータ
+    /// [セーブデータ]施設データ
     /// </summary>
-    // TODO 一時的。[SerializeField] 外す
-    [SerializeField] private FacilityListData facilityListData = null;
+    private FacilityListData facilityListData = null;
+    public FacilityListData FacilityListDataReadOnly => facilityListData;
+    /// <summary>
+    /// [セーブデータ]ユーザー基本データ
+    /// </summary>
     private UserCommonData userCommonData = null;
-    // TODO 一時的。[SerializeField] 外す
-    [SerializeField] private HavingFoodData havingFoodData = null;
+    /// <summary>
+    /// [セーブデータ]参照用のユーザー基本データ
+    /// TODO ReactivePropertyでうまく作ってもいいかもしれない
+    /// </summary>
+    public UserCommonData userCommonDataReadOnly => userCommonData;
+    /// <summary>
+    /// [セーブデータ]餌所持データ
+    /// </summary>
+    private HavingFoodData havingFoodData = null;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
@@ -74,7 +84,17 @@ public class InGameController : SceneControllerBase
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         SystemScene systemScene = SystemScene.Instance;
-        inGamePresenter.Initialize(model, dialogContainer, systemScene.SoundPlayer, systemScene.SceneTransitioner, userCommonData.coinCount, userCommonData.userRank);
+        inGamePresenter.Initialize(
+            model,
+            dialogContainer,
+            systemScene.SoundPlayer,
+            systemScene.SceneTransitioner,
+            userCommonDataReadOnly,
+            AddCoin,
+            AcquireFood,
+            FacilityListDataReadOnly,
+            UpdateFacilityLevel
+            );
         // 施設の初期化
         foreach ((int key,FacilityData facilityData) in facilityListData.facilityDictionary)
         {
@@ -258,6 +278,32 @@ public class InGameController : SceneControllerBase
             );
     }
 
+    /// <summary>
+    /// 餌の獲得
+    /// </summary>
+    /// <param name="foodId"></param>
+    /// <param name="num"></param>
+    public void AcquireFood(int foodId, int num)
+    {
+        if (!havingFoodData.havingFoodDictionary.TryGetValue(foodId, out FoodData currentFoodData))
+        {
+            var foodData = new FoodData();
+            foodData.foodId = foodId;
+            // 所持数マイナスを防ぐ(ここではハンドリングしない)
+            if(num < 0)
+            {
+                num = 0;
+            }
+            foodData.count = num;
+            havingFoodData.havingFoodDictionary[foodId] = foodData;
+        }
+        else
+        {
+            havingFoodData.havingFoodDictionary[foodId].count += num;
+        }
+        LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
+    }
+
     public void ConsumeFood(int foodAreaId)
     {
         foodAreas[foodAreaId].SetEmptyFood();
@@ -273,7 +319,7 @@ public class InGameController : SceneControllerBase
         debugDialog.Initialize(
             AddCoin,
             DebugClearPlayerPrefs,
-            DebugAcquireFood,
+            AcquireFood,
             AddExp
             );
     }
@@ -287,26 +333,5 @@ public class InGameController : SceneControllerBase
         LocalPrefs.DeleteAll();
         // 初期化を走らせておく
         Initialize();
-    }
-
-    /// <summary>
-    /// [デバッグ]餌付与
-    /// </summary>
-    /// <param name="foodId"></param>
-    /// <param name="num"></param>
-    public void DebugAcquireFood(int foodId, int num)
-    {
-        if (!havingFoodData.havingFoodDictionary.TryGetValue(foodId, out FoodData currentFoodData))
-        {
-            var foodData = new FoodData();
-            foodData.foodId = foodId;
-            foodData.count = num;
-            havingFoodData.havingFoodDictionary[foodId] = foodData;
-        }
-        else
-        {
-            havingFoodData.havingFoodDictionary[foodId].count += num;
-        }
-        LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
     }
 }

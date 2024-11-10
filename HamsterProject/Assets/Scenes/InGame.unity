@@ -624,7 +624,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4c669aa0c4b67b04f8cc5d5c562ce406, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 19c98488c91b0f8439953c476ccd44d0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1020,7 +1020,7 @@ GameObject:
   - component: {fileID: 595057679}
   - component: {fileID: 595057681}
   m_Layer: 5
-  m_Name: EnhanceButton
+  m_Name: ShopButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1066,7 +1066,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 19c98488c91b0f8439953c476ccd44d0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4c669aa0c4b67b04f8cc5d5c562ce406, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1897,11 +1897,6 @@ MonoBehaviour:
   - {fileID: 1275634186}
   - {fileID: 385634465}
   - {fileID: 1904481712}
-  facilityListData:
-    facilities: []
-  havingFoodData:
-    havingFoodDictionary:
-      data: []
 --- !u!1001 &1254111884
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2031,6 +2026,7 @@ MonoBehaviour:
   coinText: {fileID: 1627577154}
   rankText: {fileID: 465051486}
   MenuButton: {fileID: 448835877}
+  ShopButton: {fileID: 595057681}
 --- !u!224 &1271442648
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2256,7 +2252,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u304D\u3087\u3046\u304B"
+  m_text: "\u3057\u3087\u3063\u3077"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a155bc0ab1c5bbb499072f33bbb81aac, type: 2}
   m_sharedMaterial: {fileID: 1126664750727923313, guid: a155bc0ab1c5bbb499072f33bbb81aac, type: 2}
@@ -2491,7 +2487,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appearInterval: 3
   bugHamsterAppearLottery: 60
-  normalHamsterAppearLottery: 20
   hamstersCanvas: {fileID: 448861594}
   hamsterPrefab: {fileID: 1389367442502466747, guid: b5ac9d8a9ac45874ebfbee156e1004e5, type: 3}
   itemPositions:
@@ -3310,7 +3305,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.size
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.data[0]
@@ -3336,6 +3331,14 @@ PrefabInstance:
       propertyPath: dialogs.Array.data[5]
       value: 
       objectReference: {fileID: 7851828309264464707, guid: 5068b811e7f062e44a54666379f5097d, type: 3}
+    - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
+      propertyPath: dialogs.Array.data[6]
+      value: 
+      objectReference: {fileID: 4407688868612657356, guid: e84f5fa1a3d304a10b0ba07937ccd556, type: 3}
+    - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
+      propertyPath: dialogs.Array.data[7]
+      value: 
+      objectReference: {fileID: 5981688720584417002, guid: 6ab08db3a55f1444689ced9d52cc349a, type: 3}
     - target: {fileID: 4989339025704560640, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: m_IsActive
       value: 0
