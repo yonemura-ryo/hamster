@@ -25,12 +25,14 @@ public class Hamster : MonoBehaviour
 {
     [SerializeField] Image hamsterImage;
     [SerializeField] TextMeshProUGUI fixCountDownText;
-    
+
+    private int hamsterId = 0;
     private string _imagePath;
     private string _fixedHamsterImagePath;
     private int _bugId = 0;
     private float _requireBugfixTime = 0f;
     private int bugFixReward = 0;
+    private int colorId = 0;
     /// <summary>
     /// ハムスター状態
     /// </summary>
@@ -38,7 +40,7 @@ public class Hamster : MonoBehaviour
 
     private DialogContainer _dialogContainer;
     private RectTransform _rectTransform;
-    private Action<int,string> _finishFixAction;
+    private Action<int, string, int> _finishFixAction;
     private Action<int, float> _startBugFixAction;
     private int _hamsterIndex = 0;
 
@@ -52,17 +54,20 @@ public class Hamster : MonoBehaviour
     /// <param name="requireBugFixTime"></param>
     /// <param name="bugId"></param>
     public void Initialize(
+        int hamsterId,
         int hamsterIndex,
         Transform position,
-        Action<int,string> finishFixAction,
+        Action<int, string, int> finishFixAction,
         string imagePath,
         string normalImagePath,
         int bugId,
         float requireBugFixTime,
         int bugFixReward,
+        int colorId,
         Action<int,float> startBugFixAction
         )
     {
+        this.hamsterId = hamsterId;
         _hamsterIndex = hamsterIndex;
         _finishFixAction = finishFixAction;
         _imagePath = imagePath;
@@ -71,10 +76,20 @@ public class Hamster : MonoBehaviour
         //this.requireAppearTime = requireAppearTime;
         _requireBugfixTime = requireBugFixTime;
         this.bugFixReward = bugFixReward;
+        this.colorId = colorId;
         _startBugFixAction = startBugFixAction;
         _rectTransform = GetComponent<RectTransform>();
         _rectTransform.localPosition = position.localPosition;
         hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
+    }
+
+    /// <summary>
+    /// hamsterIDの取得
+    /// </summary>
+    /// <returns></returns>
+    public int GetHamsterId()
+    {
+        return hamsterId;
     }
     
     /// <summary>
@@ -140,7 +155,7 @@ public class Hamster : MonoBehaviour
                 hamsterImage.color = Color.white;
                 hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
                 InitalizeCountDonwText(Color.white, false);
-                _finishFixAction(_hamsterIndex, GetFixedHamsterImagePath());
+                _finishFixAction(_hamsterIndex, GetFixedHamsterImagePath(), colorId);
                 break;
             // TODO 修正時間短縮ダイアログ出すなど
             case HamsterStatus.BugFixing:

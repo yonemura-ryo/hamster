@@ -50,6 +50,7 @@ public class HavingFoodData
 public class HamsterData
 {
     public int hamsterId;
+    public int colorId;
     public string bugAppearTime;
     public string bugFixTime;
 }
@@ -62,6 +63,29 @@ public class HamsterExistData
 {
     public SerializableDictionary<int, HamsterData> hamsterExistDictionary;
 }
+
+/// <summary>
+/// ハムスターの捕獲データ配列
+///
+/// key = {hamsterId}:{colorId}
+/// </summary>
+[System.Serializable]
+public class HamsterCapturedListData
+{
+    public SerializableDictionary<string, HamsterCapturedData> capturedDataDictionary;
+}
+
+/// <summary>
+/// ハムスターの捕獲データ
+/// </summary>
+[System.Serializable]
+public class HamsterCapturedData
+{
+    public int hamsterId;
+    public int colorId;
+    public int capturedCount;
+}
+
 
 /// <summary>
 /// ユーザー共通データ

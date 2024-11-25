@@ -41,6 +41,10 @@ public class InGameController : SceneControllerBase
     /// [セーブデータ]餌所持データ
     /// </summary>
     private HavingFoodData havingFoodData = null;
+    /// <summary>
+    /// [セーブデータ]捕獲済みハムデータ
+    /// </summary>
+    private HamsterCapturedListData hamsterCapturedListData = null;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
@@ -80,7 +84,15 @@ public class InGameController : SceneControllerBase
             havingFoodData.havingFoodDictionary = new SerializableDictionary<int, FoodData>();
             LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
         }
-        // DebugAcquireFood(1, 5);
+
+        // 捕獲済みハムデータの読み込み
+        hamsterCapturedListData = LocalPrefs.Load<HamsterCapturedListData>(SaveData.Key.HamsterCapturedListData);
+        if(hamsterCapturedListData == null)
+        {
+            hamsterCapturedListData = new HamsterCapturedListData();
+            hamsterCapturedListData.capturedDataDictionary = new SerializableDictionary<string, HamsterCapturedData>();
+            LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+        }
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         SystemScene systemScene = SystemScene.Instance;
@@ -116,7 +128,7 @@ public class InGameController : SceneControllerBase
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
         }
         // ハムの初期化
-        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp);
+        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp, SaveCapturedHamster);
     }
 
     /// <summary>
@@ -308,6 +320,32 @@ public class InGameController : SceneControllerBase
     {
         foodAreas[foodAreaId].SetEmptyFood();
         // TODO 餌消費Timerの削除
+    }
+
+    /// <summary>
+    /// 獲得ハムスターの保存
+    /// </summary>
+    /// <param name="hamsterId"></param>
+    /// <param name="colorId"></param>
+    public void SaveCapturedHamster(int hamsterId, int colorId)
+    {
+        string key = hamsterId + ":" + colorId;
+        if (hamsterCapturedListData.capturedDataDictionary.ContainsKey(key))
+        {
+            // カウントアップ
+            HamsterCapturedData hamsterCapturedData = hamsterCapturedListData.capturedDataDictionary[key];
+            hamsterCapturedData.capturedCount++;
+            hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
+        } else
+        {
+            // 初回入手
+            HamsterCapturedData hamsterCapturedData = new HamsterCapturedData();
+            hamsterCapturedData.hamsterId = hamsterId;
+            hamsterCapturedData.colorId = colorId;
+            hamsterCapturedData.capturedCount = 1;
+            hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
+        }
+        LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
     }
 
     /// <summary>
