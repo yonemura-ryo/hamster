@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using Random = System.Random;
+using System.Linq;
 
 /// <summary>
 /// ハムスターの管理クラス
@@ -43,6 +44,7 @@ public class HamsterManager : MonoBehaviour
     private Action<int> addCoin = null;
     private Action<int> consumeFood = null;
     private Action<int> addExp = null;
+    private Action<int, int> saveCapturedHamster = null;
     
     public Dictionary<int, Hamster> hamsterList = new Dictionary<int, Hamster>();
     /// <summary>
@@ -57,6 +59,7 @@ public class HamsterManager : MonoBehaviour
     /// マスタデータ
     /// </summary>
     IReadOnlyDictionary<int, HamsterMaster> hamsterMaster;
+    IReadOnlyDictionary<string, HamsterColorTypeMaster> hamsterColorTypeMaster;
 
     /// <summary>
     /// セーブデータ
@@ -82,13 +85,14 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(List<FoodArea> foodAreaList, Action<int> addCoin, Action<int> consumeFood, Action<int> addExp)
+    public void Initialize(List<FoodArea> foodAreaList, Action<int> addCoin, Action<int> consumeFood, Action<int> addExp, Action<int, int> saveCapturedHamster)
     {
         // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
         this.foodAreaList = foodAreaList;
         this.addCoin = addCoin;
         this.consumeFood = consumeFood;
         this.addExp = addExp;
+        this.saveCapturedHamster = saveCapturedHamster;
         // ハム存在データの読み込み
         hamsterExistData = LocalPrefs.Load<HamsterExistData>(SaveData.Key.HamsterExistData);
         if (hamsterExistData == null)
@@ -100,12 +104,14 @@ public class HamsterManager : MonoBehaviour
         }
         // マスタデータ
         this.hamsterMaster = MasterData.DB.HamsterMaster;
+        this.hamsterColorTypeMaster = MasterData.DB.HamsterColorTypeMaster;
         
         // セーブデータから配置
         foreach ((int areaIndex, HamsterData hamsterData) in hamsterExistData.hamsterExistDictionary)
         {
             HamsterMaster hamsterMasterData = MasterData.DB.HamsterMaster[hamsterData.hamsterId];
-            HamsterInstantiate(hamsterMasterData, areaIndex, hamsterData, false);
+            // TODO セーブデータからcolorID取得
+            HamsterInstantiate(hamsterMasterData, areaIndex, 1, hamsterData, false);
         }
         // ハムスター出現処理
         HamsterAppear();
@@ -141,7 +147,20 @@ public class HamsterManager : MonoBehaviour
                 if(lottery >= bugHamsterAppearLottery){continue;}
                 // バグハム出現
                 HamsterMaster bugHamsterMaster = LotteryBugHamster();
-                HamsterInstantiate(bugHamsterMaster, areaIndex);
+                // 色抽選
+                var targetColorTypeMasters = hamsterColorTypeMaster
+                    .Where(x => x.Value.ColorTypeId == bugHamsterMaster.ColorTypeId)
+                ;
+                // TODO 色抽選確率の調整
+                int colorTypeCount = targetColorTypeMasters.Count();
+                int colorLottery = random.Next(0, colorTypeCount-1);
+                HamsterColorTypeMaster targetColorTypeMaster = targetColorTypeMasters
+                    .OrderBy(x => x.Value.ColorId)
+                    .Skip(colorLottery)
+                    .FirstOrDefault()
+                    .Value
+                    ;
+                HamsterInstantiate(bugHamsterMaster, areaIndex, targetColorTypeMaster.ColorId);
                 // 餌消費
                 consumeFood(areaIndex);
                 continue;
@@ -156,7 +175,7 @@ public class HamsterManager : MonoBehaviour
     /// <param name="areaIndex">出現するインデックス</param>
     /// <param name="hamsterSaveData">生成に使用するセーブデータ</param>
     /// <param name="bNeedSave">TODO セーブするかフラグ。いらない気がする</param>
-    private void HamsterInstantiate(HamsterMaster hamsterMasterData, int areaIndex, HamsterData hamsterSaveData=null, bool bNeedSave=true)
+    private void HamsterInstantiate(HamsterMaster hamsterMasterData, int areaIndex, int colorId, HamsterData hamsterSaveData=null, bool bNeedSave=true)
     {
         GameObject hamsterObject = Instantiate(hamsterPrefab);
         hamsterObject.transform.SetParent(hamstersCanvas.transform);
@@ -178,6 +197,7 @@ public class HamsterManager : MonoBehaviour
             }
         }
         hamster.Initialize(
+            hamsterMasterData.HamsterId,
             areaIndex,
             itemPositions[areaIndex],
             ShowDialogByFixedHamster,
@@ -186,6 +206,7 @@ public class HamsterManager : MonoBehaviour
             hamsterMasterData.BugId,
             bugFixTime,
             hamsterMasterData.BugFixReward,
+            colorId,
             (index, bugFixTime) => StartHamsterBugFix(index, bugFixTime)
             );
         // 出現中ハムスター管理
@@ -226,6 +247,7 @@ public class HamsterManager : MonoBehaviour
             // セーブ
             HamsterData hamsterData = new HamsterData();
             hamsterData.hamsterId = hamsterMasterData.HamsterId;
+            hamsterData.colorId = colorId;
             hamsterData.bugFixTime = DateTime.MaxValue.ToString();
             hamsterData.bugAppearTime = DateTime.Now.Add(TimeSpan.FromSeconds(bugAppearTime)).ToString();
             hamsterExistData.hamsterExistDictionary.Add(areaIndex, hamsterData);
@@ -281,9 +303,10 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// ハムスター修理完了ダイアログ
     /// </summary>
-    public void ShowDialogByFixedHamster(int hamsterIndex, string imagePath)
+    public void ShowDialogByFixedHamster(int hamsterIndex, string imagePath, int colorId)
     {
         HamsterFixedDialog hamsterFixedDialog = dialogContainer.Show<HamsterFixedDialog>();
+        int hamsterId = hamsterList[hamsterIndex].GetHamsterId();
         int rewardCoin = hamsterList[hamsterIndex].GetBugFixReward();
         GameObject hamster = hamsterList[hamsterIndex].gameObject;
         hamsterList.Remove(hamsterIndex);
@@ -295,6 +318,8 @@ public class HamsterManager : MonoBehaviour
         // セーブ
         hamsterExistData.hamsterExistDictionary.Remove(hamsterIndex);
         LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);
+        // 修正済みハムスターデータセーブ
+        saveCapturedHamster(hamsterId, colorId);
     }
 
     /// <summary>
