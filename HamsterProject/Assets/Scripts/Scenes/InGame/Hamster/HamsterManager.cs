@@ -46,6 +46,9 @@ public class HamsterManager : MonoBehaviour
     private Action<int> addExp = null;
     private Action<int, int> saveCapturedHamster = null;
     private Func<int> getLotteryIdByFacility = null;
+    private Func<float> getFixTimeShortRateByFacility = null;
+    private Func<float> getAcquireCoinExpRateByFacility = null;
+    private Func<int, int, bool> isNewHamster = null;
 
     public Dictionary<int, Hamster> hamsterList = new Dictionary<int, Hamster>();
     /// <summary>
@@ -94,8 +97,12 @@ public class HamsterManager : MonoBehaviour
         Action<int> consumeFood,
         Action<int> addExp,
         Action<int, int> saveCapturedHamster,
-        Func<int> getLotteryIdByFacility
-     ){
+        Func<int> getLotteryIdByFacility,
+        Func<float> getFixTimeShortRateByFacility,
+        Func<float> getAcquireCoinExpRateByFacility,
+        Func<int, int, bool>isNewHamster
+     )
+    {
         // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
         this.foodAreaList = foodAreaList;
         this.addCoin = addCoin;
@@ -103,6 +110,9 @@ public class HamsterManager : MonoBehaviour
         this.addExp = addExp;
         this.saveCapturedHamster = saveCapturedHamster;
         this.getLotteryIdByFacility = getLotteryIdByFacility;
+        this.getFixTimeShortRateByFacility = getFixTimeShortRateByFacility;
+        this.getAcquireCoinExpRateByFacility = getAcquireCoinExpRateByFacility;
+        this.isNewHamster = isNewHamster;
         // ハム存在データの読み込み
         hamsterExistData = LocalPrefs.Load<HamsterExistData>(SaveData.Key.HamsterExistData);
         if (hamsterExistData == null)
@@ -220,6 +230,7 @@ public class HamsterManager : MonoBehaviour
                 bugFixTime = bugFixTimeSpan.Seconds;
             }
         }
+        HamsterBugMaster bugMaster = hamsterBugMaster[hamsterMasterData.BugId];
         hamster.Initialize(
             hamsterMasterData.HamsterId,
             areaIndex,
@@ -229,10 +240,12 @@ public class HamsterManager : MonoBehaviour
             hamsterMasterData.ImagePath,
             hamsterMasterData.NormalImagePath,
             hamsterMasterData.BugId,
+            bugMaster.Rare,
             bugFixTime,
             hamsterMasterData.BugFixReward,
             colorId,
-            (index, bugFixTime) => StartHamsterBugFix(index, bugFixTime)
+            (index, bugFixTime) => StartHamsterBugFix(index, bugFixTime),
+            isNewHamster(hamsterMasterData.HamsterId,colorId)
             );
         // 出現中ハムスター管理
         hamsterList[areaIndex] = hamster;
@@ -288,7 +301,9 @@ public class HamsterManager : MonoBehaviour
     public void StartHamsterBugFix(int hamsterIndex, float bugFixTime, bool bNeedSave=true)
     {
         Hamster hamster = hamsterList[hamsterIndex];
-
+        // 施設レベルによる修正時間短縮を適用
+        float shortRate = getFixTimeShortRateByFacility();
+        bugFixTime *= shortRate;
         TimeSpan timeSpan = TimeSpan.FromSeconds(bugFixTime);
         IDisposable hamsterBugFix = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1))
             .TakeUntil(Observable.Timer(timeSpan))
@@ -333,13 +348,15 @@ public class HamsterManager : MonoBehaviour
         HamsterFixedDialog hamsterFixedDialog = dialogContainer.Show<HamsterFixedDialog>();
         int hamsterId = hamsterList[hamsterIndex].GetHamsterId();
         int rewardCoin = hamsterList[hamsterIndex].GetBugFixReward();
+        int exp = hamsterList[hamsterIndex].GetExpByRare();
         GameObject hamster = hamsterList[hamsterIndex].gameObject;
         hamsterList.Remove(hamsterIndex);
         hamsterFixedDialog.SetHamsterImage(Resources.Load<Sprite>(imagePath));
         Destroy(hamster);
         // ハム修正報酬コイン獲得
-        addCoin?.Invoke(rewardCoin);
-        addExp?.Invoke(1);
+        float aquireRate = getAcquireCoinExpRateByFacility();
+        addCoin?.Invoke((int)(rewardCoin * aquireRate));
+        addExp?.Invoke((int)(exp * aquireRate));
         // セーブ
         hamsterExistData.hamsterExistDictionary.Remove(hamsterIndex);
         LocalPrefs.Save(SaveData.Key.HamsterExistData, hamsterExistData);

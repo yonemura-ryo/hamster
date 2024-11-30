@@ -24,6 +24,7 @@ public enum HamsterStatus
 public class Hamster : MonoBehaviour
 {
     [SerializeField] Image hamsterImage;
+    [SerializeField] Image newIconImage;
     [SerializeField] TextMeshProUGUI fixCountDownText;
     [SerializeField] TextMeshProUGUI debugHamInfoText;
 
@@ -32,6 +33,7 @@ public class Hamster : MonoBehaviour
     private string _imagePath;
     private string _fixedHamsterImagePath;
     private int _bugId = 0;
+    private int bugRarity = 0;
     private float _requireBugfixTime = 0f;
     private int bugFixReward = 0;
     private int colorId = 0;
@@ -64,10 +66,12 @@ public class Hamster : MonoBehaviour
         string imagePath,
         string normalImagePath,
         int bugId,
+        int bugRarity,
         float requireBugFixTime,
         int bugFixReward,
         int colorId,
-        Action<int,float> startBugFixAction
+        Action<int,float> startBugFixAction,
+        bool isNew=false
         )
     {
         this.hamsterId = hamsterId;
@@ -77,6 +81,7 @@ public class Hamster : MonoBehaviour
         _imagePath = imagePath;
         _fixedHamsterImagePath = normalImagePath;
         _bugId = bugId;
+        this.bugRarity = bugRarity;
         //this.requireAppearTime = requireAppearTime;
         _requireBugfixTime = requireBugFixTime;
         this.bugFixReward = bugFixReward;
@@ -85,6 +90,11 @@ public class Hamster : MonoBehaviour
         _rectTransform = GetComponent<RectTransform>();
         _rectTransform.localPosition = position.localPosition;
         hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
+
+        if (isNew)
+        {
+            newIconImage.gameObject.SetActive(true);
+        }
 
         // デバッグ用
         debugHamInfoText.text = "ham:" + hamsterId + " rare:" + hamsterRarity + " bug:" + bugId;
@@ -133,6 +143,15 @@ public class Hamster : MonoBehaviour
     public int GetBugFixReward()
     {
         return bugFixReward;
+    }
+
+    /// <summary>
+    /// 取得経験値
+    /// </summary>
+    /// <returns></returns>
+    public int GetExpByRare()
+    {
+        return hamsterRarity * bugRarity;
     }
     
     /// <summary>
