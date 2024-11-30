@@ -10,7 +10,7 @@ public class HamsterMaster
         float bugAppearTime,
         float bugFixTime,
         int bugFixReward,
-        int appearReleaseId,
+        int appearUserRank,
         int colorTypeId
         )
     {
@@ -23,7 +23,7 @@ public class HamsterMaster
         BugAppearTime = bugAppearTime;
         BugFixTime = bugFixTime;
         BugFixReward = bugFixReward;
-        AppearRelaseId = appearReleaseId;
+        AppearUserRank = appearUserRank;
         ColorTypeId = colorTypeId;
     }
 
@@ -45,7 +45,7 @@ public class HamsterMaster
 
     public int BugFixReward { get; }
 
-    public int AppearRelaseId { get; }
+    public int AppearUserRank { get; }
 
     public int ColorTypeId { get; }
 }

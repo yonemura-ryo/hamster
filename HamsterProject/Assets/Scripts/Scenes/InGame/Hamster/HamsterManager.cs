@@ -59,7 +59,9 @@ public class HamsterManager : MonoBehaviour
     /// マスタデータ
     /// </summary>
     IReadOnlyDictionary<int, HamsterMaster> hamsterMaster;
+    IReadOnlyDictionary<int, HamsterBugMaster> hamsterBugMaster;
     IReadOnlyDictionary<string, HamsterColorTypeMaster> hamsterColorTypeMaster;
+    IReadOnlyDictionary<int, RarityLotteryMaster> rarityLotteryMaster;
 
     /// <summary>
     /// セーブデータ
@@ -104,7 +106,9 @@ public class HamsterManager : MonoBehaviour
         }
         // マスタデータ
         this.hamsterMaster = MasterData.DB.HamsterMaster;
+        this.hamsterBugMaster = MasterData.DB.HamsterBugMaster;
         this.hamsterColorTypeMaster = MasterData.DB.HamsterColorTypeMaster;
+        this.rarityLotteryMaster = MasterData.DB.RarityLotteryMaster;
         
         // セーブデータから配置
         foreach ((int areaIndex, HamsterData hamsterData) in hamsterExistData.hamsterExistDictionary)
@@ -138,6 +142,7 @@ public class HamsterManager : MonoBehaviour
             }
             FoodArea foodArea = foodAreaList[areaIndex];
             int foodId = foodArea.GetExistFoodId();
+            int lotteryId = foodArea.GetExitstLotteryId();
             // 餌配置済み
             if (foodId > 0)
             {
@@ -146,7 +151,7 @@ public class HamsterManager : MonoBehaviour
                 int lottery = random.Next(0,100);
                 if(lottery >= bugHamsterAppearLottery){continue;}
                 // バグハム出現
-                HamsterMaster bugHamsterMaster = LotteryBugHamster();
+                HamsterMaster bugHamsterMaster = LotteryBugHamster(lotteryId);
                 // 色抽選
                 var targetColorTypeMasters = hamsterColorTypeMaster
                     .Where(x => x.Value.ColorTypeId == bugHamsterMaster.ColorTypeId)
@@ -201,6 +206,7 @@ public class HamsterManager : MonoBehaviour
             areaIndex,
             itemPositions[areaIndex],
             ShowDialogByFixedHamster,
+            hamsterMasterData.Rare,
             hamsterMasterData.ImagePath,
             hamsterMasterData.NormalImagePath,
             hamsterMasterData.BugId,
@@ -326,12 +332,75 @@ public class HamsterManager : MonoBehaviour
     /// バグハムスターの抽選
     /// </summary>
     /// <returns></returns>
-    private HamsterMaster LotteryBugHamster()
+    private HamsterMaster LotteryBugHamster(int lotteryId)
     {
-        // TODO バグハムスターの抽選ロジック
+        // バグハムスターの抽選ロジック
+        RarityLotteryMaster rarityLottery = rarityLotteryMaster[lotteryId];
+        HamsterMaster bugHamsterMaster = null;
+        while (bugHamsterMaster == null)
+        {
+            // ハムレア度の抽選
+            int lotteryHam = GetRarityByRandom(rarityLottery);
+            // バグレア度の抽選
+            HamsterBugMaster bugMaster = null;
+            while (bugMaster == null)
+            {
+                int lotteryBug = GetRarityByRandom(rarityLottery);
+                bugMaster = hamsterBugMaster
+                    .Where(x => x.Value.Rare == lotteryBug)
+                    .OrderBy(x => Guid.NewGuid())
+                    .FirstOrDefault()
+                    .Value;
+            }
+
+            // 該当のハムを取得し、その中からランダムで抽選
+            // 該当ハムがいなければ抽選し直し
+            bugHamsterMaster = hamsterMaster
+                .Where(x => x.Value.Rare == lotteryHam)
+                .Where(x => x.Value.BugId == bugMaster.BugId)
+                .Where(x => x.Value.AppearUserRank <= InGameController.userCommonDataReadOnly.userRank)
+                .OrderBy(x => Guid.NewGuid())
+                .FirstOrDefault()
+                .Value;
+        }
+
+        return bugHamsterMaster;
+    }
+
+    /// <summary>
+    /// レア度抽選
+    /// </summary>
+    /// <param name="rarityLottery"></param>
+    /// <returns></returns>
+    private int GetRarityByRandom(RarityLotteryMaster rarityLottery)
+    {
+        int lotteryMax =
+            rarityLottery.Rare1 +
+            rarityLottery.Rare2 +
+            rarityLottery.Rare3 +
+            rarityLottery.Rare4 +
+            rarityLottery.Rare5;
         Random random = new Random();
-        int lottery = random.Next(1,3);
-        int bugHamsterId = lottery;
-        return hamsterMaster[bugHamsterId];
+        int lottery = random.Next(1, lotteryMax);
+        if(lottery <= rarityLottery.Rare5)
+        {
+            return 5;
+        }
+        else if(lottery <= (rarityLottery.Rare5 + rarityLottery.Rare4))
+        {
+            return 4;
+        }
+        else if (lottery <= (rarityLottery.Rare5 + rarityLottery.Rare4 + rarityLottery.Rare3))
+        {
+            return 3;
+        }
+        else if (lottery <= (rarityLottery.Rare5 + rarityLottery.Rare4 + rarityLottery.Rare3 + rarityLottery.Rare2))
+        {
+            return 2;
+        }
+        else
+        {
+            return 1;
+        }
     }
 }

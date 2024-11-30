@@ -31,12 +31,12 @@ public class InGameController : SceneControllerBase
     /// <summary>
     /// [セーブデータ]ユーザー基本データ
     /// </summary>
-    private UserCommonData userCommonData = null;
+    private static UserCommonData userCommonData = null;
     /// <summary>
     /// [セーブデータ]参照用のユーザー基本データ
     /// TODO ReactivePropertyでうまく作ってもいいかもしれない
     /// </summary>
-    public UserCommonData userCommonDataReadOnly => userCommonData;
+    public static UserCommonData userCommonDataReadOnly => userCommonData;
     /// <summary>
     /// [セーブデータ]餌所持データ
     /// </summary>
@@ -264,12 +264,14 @@ public class InGameController : SceneControllerBase
     public void UseFood(int foodAreaId, int foodId)
     {
         // TODO 餌の配置と消費時間管理
-        foodAreas[foodAreaId].SetFood(foodId);
         FoodMaster foodMasterData = FoodMaster[foodId];
-        Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
-            .Subscribe (delay => {
-                foodAreas[foodAreaId].SetEmptyFood();
-            });
+        foodAreas[foodAreaId].SetFood(foodId, foodMasterData.LotteryId);
+        
+        // TODO 一旦餌の消滅はなしにする
+        //Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
+        //    .Subscribe (delay => {
+        //        foodAreas[foodAreaId].SetEmptyFood();
+        //    });
         // 餌消費
         havingFoodData.havingFoodDictionary[foodId].count--;
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
@@ -316,6 +318,10 @@ public class InGameController : SceneControllerBase
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
     }
 
+    /// <summary>
+    /// ハムスター出現による餌消費
+    /// </summary>
+    /// <param name="foodAreaId"></param>
     public void ConsumeFood(int foodAreaId)
     {
         foodAreas[foodAreaId].SetEmptyFood();

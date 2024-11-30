@@ -25,8 +25,10 @@ public class Hamster : MonoBehaviour
 {
     [SerializeField] Image hamsterImage;
     [SerializeField] TextMeshProUGUI fixCountDownText;
+    [SerializeField] TextMeshProUGUI debugHamInfoText;
 
     private int hamsterId = 0;
+    private int hamsterRarity = 0;
     private string _imagePath;
     private string _fixedHamsterImagePath;
     private int _bugId = 0;
@@ -58,6 +60,7 @@ public class Hamster : MonoBehaviour
         int hamsterIndex,
         Transform position,
         Action<int, string, int> finishFixAction,
+        int hamsterRarity,
         string imagePath,
         string normalImagePath,
         int bugId,
@@ -70,6 +73,7 @@ public class Hamster : MonoBehaviour
         this.hamsterId = hamsterId;
         _hamsterIndex = hamsterIndex;
         _finishFixAction = finishFixAction;
+        this.hamsterRarity = hamsterRarity;
         _imagePath = imagePath;
         _fixedHamsterImagePath = normalImagePath;
         _bugId = bugId;
@@ -81,6 +85,9 @@ public class Hamster : MonoBehaviour
         _rectTransform = GetComponent<RectTransform>();
         _rectTransform.localPosition = position.localPosition;
         hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
+
+        // デバッグ用
+        debugHamInfoText.text = "ham:" + hamsterId + " rare:" + hamsterRarity + " bug:" + bugId;
     }
 
     /// <summary>

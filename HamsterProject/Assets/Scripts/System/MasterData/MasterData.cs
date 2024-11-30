@@ -33,6 +33,7 @@ public partial class MasterDataDB
     public IReadOnlyDictionary<string, FacilityLevelMaster> FacilityLevelMaster => facilityLevelMaster;
     public IReadOnlyDictionary<int, FoodMaster> FoodMaster => foodMaster;
     public IReadOnlyDictionary<int, UserRankMaster> UserRankMaster => userRankMaster;
+    public IReadOnlyDictionary<int, RarityLotteryMaster> RarityLotteryMaster => rarityLotteryMaster;
 
     private Dictionary<int, HamsterMaster> hamsterMaster;
     private Dictionary<int, HamsterBugMaster> hamsterBugMaster;
@@ -41,6 +42,7 @@ public partial class MasterDataDB
     private Dictionary<string, FacilityLevelMaster> facilityLevelMaster;
     private Dictionary<int, FoodMaster> foodMaster;
     private Dictionary<int, UserRankMaster> userRankMaster;
+    private Dictionary<int, RarityLotteryMaster> rarityLotteryMaster;
 
     /// <summary>
     /// Constructor.
@@ -54,6 +56,7 @@ public partial class MasterDataDB
         facilityLevelMaster = GetFacilityLevelMaster(MasterDefine.Name.FacilityLevelMaster);
         foodMaster = GetFoodMaster(MasterDefine.Name.FoodMaster);
         userRankMaster = GetUserRankMaster(MasterDefine.Name.UserRankMaster);
+        rarityLotteryMaster = GetRarityLotteryMaster(MasterDefine.Name.RarityLotteryMaster);
     }
 
     /// <summary>
