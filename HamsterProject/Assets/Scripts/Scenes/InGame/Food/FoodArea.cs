@@ -15,6 +15,10 @@ public class FoodArea : MonoBehaviour
     /// 配置中の餌ID
     /// </summary>
     private int existFoodId = 0;
+    /// <summary>
+    /// 配置中餌の抽選ID
+    /// </summary>
+    private int existLotteryId = 0;
     
     [SerializeField] private Image foodAreaImage;
     [SerializeField] private Sprite emptyFoodSprite;
@@ -35,6 +39,11 @@ public class FoodArea : MonoBehaviour
     {
         return existFoodId;
     }
+
+    public int GetExitstLotteryId()
+    {
+        return existLotteryId;
+    }
     
     /// <summary>
     /// 餌場クリック
@@ -48,9 +57,10 @@ public class FoodArea : MonoBehaviour
     /// <summary>
     /// 餌配置
     /// </summary>
-    public void SetFood(int foodId)
+    public void SetFood(int foodId, int lotteryId)
     {
         existFoodId = foodId;
+        existLotteryId = lotteryId;
         foodAreaImage.sprite = fullFoodSprite;
     }
 
@@ -60,6 +70,7 @@ public class FoodArea : MonoBehaviour
     public void SetEmptyFood()
     {
         existFoodId = 0;
+        existLotteryId = 0;
         foodAreaImage.sprite = emptyFoodSprite;
     }
 }

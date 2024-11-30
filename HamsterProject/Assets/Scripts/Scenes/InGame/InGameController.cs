@@ -31,12 +31,12 @@ public class InGameController : SceneControllerBase
     /// <summary>
     /// [セーブデータ]ユーザー基本データ
     /// </summary>
-    private UserCommonData userCommonData = null;
+    private static UserCommonData userCommonData = null;
     /// <summary>
     /// [セーブデータ]参照用のユーザー基本データ
     /// TODO ReactivePropertyでうまく作ってもいいかもしれない
     /// </summary>
-    public UserCommonData userCommonDataReadOnly => userCommonData;
+    public static UserCommonData userCommonDataReadOnly => userCommonData;
     /// <summary>
     /// [セーブデータ]餌所持データ
     /// </summary>
@@ -126,9 +126,20 @@ public class InGameController : SceneControllerBase
         {
             // TODO 解放されてる餌場のみに限定する
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
+            // TODO 配置中の餌
         }
         // ハムの初期化
-        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp, SaveCapturedHamster);
+        hamsterManager.Initialize(
+            foodAreas,
+            AddCoin,
+            ConsumeFood,
+            AddExp,
+            SaveCapturedHamster,
+            GetLotteryIdByFacility,
+            GetFixTimeShortRateByFacility,
+            GetAcquireCoinExpRateByFacility,
+            IsNewHamster
+            );
     }
 
     /// <summary>
@@ -158,6 +169,7 @@ public class InGameController : SceneControllerBase
     /// <param name="addCoinCount"></param>
     public void AddCoin(int addCoinCount)
     {
+        Debug.Log("addCoin:" + addCoinCount);
         userCommonData.coinCount += addCoinCount;
         // 0以下は0にする(ここでは不足チェックしない)
         if (userCommonData.coinCount < 0)
@@ -175,6 +187,7 @@ public class InGameController : SceneControllerBase
     /// <param name="addExp"></param>
     public void AddExp(int addExp)
     {
+        Debug.Log("addExp:" + addExp);
         userCommonData.exp += addExp;
         // ユーザーランク上昇判定
         bool isRankUp = true;
@@ -257,6 +270,65 @@ public class InGameController : SceneControllerBase
     }
 
     /// <summary>
+    /// 施設レベルによるハム抽選ID
+    /// </summary>
+    public int GetLotteryIdByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.rareHamster)){
+            // レベルをそのまま抽選IDとする
+            return facilityListData.facilityDictionary[FacilityDefine.TypeId.rareHamster].level;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// 施設レベルによる修正時間短縮
+    /// 返却値を修正時間にかける
+    /// </summary>
+    /// <returns></returns>
+    public float GetFixTimeShortRateByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.fixTime))
+        {
+            FacilityData facilityData = facilityListData.facilityDictionary[FacilityDefine.TypeId.fixTime];
+            if(facilityData.level == 0)
+            {
+                return 1;
+            }
+            return 1.0f - facilityData.level/10.0f;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// 施設レベルによるコインと経験値取得増加比率
+    /// 返却値を獲得量にかける
+    /// </summary>
+    /// <returns></returns>
+    public float GetAcquireCoinExpRateByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.coinAndExp))
+        {
+            FacilityData facilityData = facilityListData.facilityDictionary[FacilityDefine.TypeId.coinAndExp];
+            if (facilityData.level == 0)
+            {
+                return 1;
+            }
+            return 1.0f + facilityData.level;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    /// <summary>
     /// 餌使用配置
     /// </summary>
     /// <param name="foodAreaId"></param>
@@ -264,12 +336,18 @@ public class InGameController : SceneControllerBase
     public void UseFood(int foodAreaId, int foodId)
     {
         // TODO 餌の配置と消費時間管理
-        foodAreas[foodAreaId].SetFood(foodId);
         FoodMaster foodMasterData = FoodMaster[foodId];
-        Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
-            .Subscribe (delay => {
-                foodAreas[foodAreaId].SetEmptyFood();
-            });
+        foodAreas[foodAreaId].SetFood(foodId, foodMasterData.LotteryId);
+
+        // TODO 一旦餌の消滅はなしにする
+        //Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
+        //    .Subscribe (delay => {
+        //        foodAreas[foodAreaId].SetEmptyFood();
+        //    });
+        //    .AddTo(this);
+
+        // ハムスター出現タイマー
+        hamsterManager.HamsterAppearTimer(foodAreaId);
         // 餌消費
         havingFoodData.havingFoodDictionary[foodId].count--;
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
@@ -316,6 +394,10 @@ public class InGameController : SceneControllerBase
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
     }
 
+    /// <summary>
+    /// ハムスター出現による餌消費
+    /// </summary>
+    /// <param name="foodAreaId"></param>
     public void ConsumeFood(int foodAreaId)
     {
         foodAreas[foodAreaId].SetEmptyFood();
@@ -346,6 +428,18 @@ public class InGameController : SceneControllerBase
             hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
         }
         LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+    }
+
+    /// <summary>
+    /// 新規ハムスターか
+    /// </summary>
+    /// <param name="hamsterId"></param>
+    /// <param name="colorId"></param>
+    /// <returns></returns>
+    public bool IsNewHamster(int hamsterId, int colorId)
+    {
+        string key = hamsterId + ":" + colorId;
+        return hamsterCapturedListData.capturedDataDictionary.ContainsKey(key);
     }
 
     /// <summary>

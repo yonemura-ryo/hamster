@@ -123,10 +123,14 @@ public partial class MasterDataDB
                 Id,
                 line[1],
                 line[2],
-                line[3],
+                int.Parse(line[3]),
                 int.Parse(line[4]),
-                float.Parse(line[5]),
-                int.Parse(line[6])
+                line[5],
+                int.Parse(line[6]),
+                //float.Parse(line[7]),
+                0,
+                //int.Parse(line[8])
+                0
             ));
         }
 
@@ -143,7 +147,28 @@ public partial class MasterDataDB
             result.Add(Id, new UserRankMaster(
                 Id,
                 int.Parse(line[1]),
-                int.Parse(line[2])
+                int.Parse(line[2]),
+                int.Parse(line[3])
+            ));
+        }
+
+        return result;
+    }
+
+    public Dictionary<int, RarityLotteryMaster> GetRarityLotteryMaster(string masterName)
+    {
+        Dictionary<int, RarityLotteryMaster> result = new Dictionary<int, RarityLotteryMaster>();
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new RarityLotteryMaster(
+                Id,
+                int.Parse(line[1]),
+                int.Parse(line[2]),
+                int.Parse(line[3]),
+                int.Parse(line[4]),
+                int.Parse(line[5])
             ));
         }
 
