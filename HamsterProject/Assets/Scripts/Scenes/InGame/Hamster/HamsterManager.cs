@@ -15,12 +15,12 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 出現処理実行間隔秒
     /// </summary>
-    [SerializeField] private int appearInterval = 3;
+    [SerializeField] private int appearInterval = 10;
 
     /// <summary>
     /// バグハムスター出現確率
     /// </summary>
-    [SerializeField] private int bugHamsterAppearLottery = 60;
+    [SerializeField] private int bugHamsterAppearLottery = 100;
     /// <summary>
     /// 通常ハムスター出現確率
     /// </summary>
@@ -45,7 +45,8 @@ public class HamsterManager : MonoBehaviour
     private Action<int> consumeFood = null;
     private Action<int> addExp = null;
     private Action<int, int> saveCapturedHamster = null;
-    
+    private Func<int> getLotteryIdByFacility = null;
+
     public Dictionary<int, Hamster> hamsterList = new Dictionary<int, Hamster>();
     /// <summary>
     /// ハムスターの購読処理管理
@@ -87,14 +88,21 @@ public class HamsterManager : MonoBehaviour
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(List<FoodArea> foodAreaList, Action<int> addCoin, Action<int> consumeFood, Action<int> addExp, Action<int, int> saveCapturedHamster)
-    {
+    public void Initialize(
+        List<FoodArea> foodAreaList,
+        Action<int> addCoin,
+        Action<int> consumeFood,
+        Action<int> addExp,
+        Action<int, int> saveCapturedHamster,
+        Func<int> getLotteryIdByFacility
+     ){
         // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
         this.foodAreaList = foodAreaList;
         this.addCoin = addCoin;
         this.consumeFood = consumeFood;
         this.addExp = addExp;
         this.saveCapturedHamster = saveCapturedHamster;
+        this.getLotteryIdByFacility = getLotteryIdByFacility;
         // ハム存在データの読み込み
         hamsterExistData = LocalPrefs.Load<HamsterExistData>(SaveData.Key.HamsterExistData);
         if (hamsterExistData == null)
@@ -114,25 +122,9 @@ public class HamsterManager : MonoBehaviour
         foreach ((int areaIndex, HamsterData hamsterData) in hamsterExistData.hamsterExistDictionary)
         {
             HamsterMaster hamsterMasterData = MasterData.DB.HamsterMaster[hamsterData.hamsterId];
-            // TODO セーブデータからcolorID取得
-            HamsterInstantiate(hamsterMasterData, areaIndex, 1, hamsterData, false);
+            HamsterInstantiate(hamsterMasterData, areaIndex, hamsterData.colorId, hamsterData, false);
         }
         // ハムスター出現処理
-        HamsterAppear();
-        // 指定秒ごとに出現処理実行
-        Observable.Interval(TimeSpan.FromSeconds(appearInterval))
-            .Subscribe(x =>
-            {
-                HamsterAppear();
-            })
-            .AddTo(this);
-    }
-
-    /// <summary>
-    /// ハムスター出現処理
-    /// </summary>
-    private void HamsterAppear()
-    {
         for (int areaIndex = 0; areaIndex < foodAreaList.Count; areaIndex++)
         {
             // ハムスター配置済み
@@ -141,35 +133,62 @@ public class HamsterManager : MonoBehaviour
                 continue;
             }
             FoodArea foodArea = foodAreaList[areaIndex];
-            int foodId = foodArea.GetExistFoodId();
-            int lotteryId = foodArea.GetExitstLotteryId();
-            // 餌配置済み
-            if (foodId > 0)
+            HamsterAppear(foodArea, areaIndex);
+        }
+    }
+
+    /// <summary>
+    /// ハムスター出現タイマーセット
+    /// </summary>
+    /// <param name="areaIndex"></param>
+    public void HamsterAppearTimer(int areaIndex, int offsetCount=0)
+    {
+        FoodArea foodArea = foodAreaList[areaIndex];
+        Observable.Interval(TimeSpan.FromSeconds(appearInterval - offsetCount))
+            .Subscribe(x =>
             {
-                // TODO 抽選確率の調整
-                Random random = new Random();
-                int lottery = random.Next(0,100);
-                if(lottery >= bugHamsterAppearLottery){continue;}
-                // バグハム出現
-                HamsterMaster bugHamsterMaster = LotteryBugHamster(lotteryId);
-                // 色抽選
-                var targetColorTypeMasters = hamsterColorTypeMaster
-                    .Where(x => x.Value.ColorTypeId == bugHamsterMaster.ColorTypeId)
+                HamsterAppear(foodArea, areaIndex);
+            })
+            .AddTo(foodArea);
+    }
+
+    /// <summary>
+    /// ハムスター出現処理
+    /// </summary>
+    private void HamsterAppear(FoodArea foodArea, int areaIndex)
+    {
+        int foodId = foodArea.GetExistFoodId();
+        // 餌配置済み
+        if (foodId > 0)
+        {
+            // TODO 出現抽選確率の調整
+            Random random = new Random();
+            int lottery = random.Next(0, 100);
+            if (lottery >= bugHamsterAppearLottery) { return; }
+
+            int lotteryId = foodArea.GetExitstLotteryId();
+            Debug.Log("餌の抽選ID：" + lotteryId);
+            // 施設の強化によるlotteryIdを加算
+            lotteryId += getLotteryIdByFacility();
+                
+            // バグハム出現
+            HamsterMaster bugHamsterMaster = LotteryBugHamster(lotteryId);
+            // 色抽選
+            var targetColorTypeMasters = hamsterColorTypeMaster
+                .Where(x => x.Value.ColorTypeId == bugHamsterMaster.ColorTypeId)
+            ;
+            // TODO 色抽選確率の調整
+            int colorTypeCount = targetColorTypeMasters.Count();
+            int colorLottery = random.Next(0, colorTypeCount-1);
+            HamsterColorTypeMaster targetColorTypeMaster = targetColorTypeMasters
+                .OrderBy(x => x.Value.ColorId)
+                .Skip(colorLottery)
+                .FirstOrDefault()
+                .Value
                 ;
-                // TODO 色抽選確率の調整
-                int colorTypeCount = targetColorTypeMasters.Count();
-                int colorLottery = random.Next(0, colorTypeCount-1);
-                HamsterColorTypeMaster targetColorTypeMaster = targetColorTypeMasters
-                    .OrderBy(x => x.Value.ColorId)
-                    .Skip(colorLottery)
-                    .FirstOrDefault()
-                    .Value
-                    ;
-                HamsterInstantiate(bugHamsterMaster, areaIndex, targetColorTypeMaster.ColorId);
-                // 餌消費
-                consumeFood(areaIndex);
-                continue;
-            }
+            HamsterInstantiate(bugHamsterMaster, areaIndex, targetColorTypeMaster.ColorId);
+            // 餌消費
+            consumeFood(areaIndex);
         }
     }
 
@@ -334,6 +353,7 @@ public class HamsterManager : MonoBehaviour
     /// <returns></returns>
     private HamsterMaster LotteryBugHamster(int lotteryId)
     {
+        Debug.Log("抽選ID：" + lotteryId);
         // バグハムスターの抽選ロジック
         RarityLotteryMaster rarityLottery = rarityLotteryMaster[lotteryId];
         HamsterMaster bugHamsterMaster = null;

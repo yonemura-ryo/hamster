@@ -126,9 +126,10 @@ public class InGameController : SceneControllerBase
         {
             // TODO 解放されてる餌場のみに限定する
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
+            // TODO 配置中の餌
         }
         // ハムの初期化
-        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp, SaveCapturedHamster);
+        hamsterManager.Initialize(foodAreas, AddCoin, ConsumeFood, AddExp, SaveCapturedHamster, GetLotteryIdByFacility);
     }
 
     /// <summary>
@@ -257,6 +258,21 @@ public class InGameController : SceneControllerBase
     }
 
     /// <summary>
+    /// 施設レベルによるハム抽選ID
+    /// </summary>
+    public int GetLotteryIdByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.rareHamster)){
+            // レベルをそのまま抽選IDとする
+            return facilityListData.facilityDictionary[FacilityDefine.TypeId.rareHamster].level;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
     /// 餌使用配置
     /// </summary>
     /// <param name="foodAreaId"></param>
@@ -266,12 +282,16 @@ public class InGameController : SceneControllerBase
         // TODO 餌の配置と消費時間管理
         FoodMaster foodMasterData = FoodMaster[foodId];
         foodAreas[foodAreaId].SetFood(foodId, foodMasterData.LotteryId);
-        
+
         // TODO 一旦餌の消滅はなしにする
         //Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
         //    .Subscribe (delay => {
         //        foodAreas[foodAreaId].SetEmptyFood();
         //    });
+        //    .AddTo(this);
+
+        // ハムスター出現タイマー
+        hamsterManager.HamsterAppearTimer(foodAreaId);
         // 餌消費
         havingFoodData.havingFoodDictionary[foodId].count--;
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
