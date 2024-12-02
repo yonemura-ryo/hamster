@@ -2,4 +2,4 @@ facility_id,name,image_path,description,level_type
 ,,,{%} はreplace_textに置換される,
 1,まわしくるま,rat_race_businessman,修正時間が<color=red>{%}</color>短くなる,1
 2,すべりだい,suberidai,レアなバグスターが<color=red>{%}</color>出やすくなる,2
-3,みず,drink_water_server,"コインと経験値が<color=""red"">{%}</color>増える",3
+3,みず,drink_water_server,コインと経験値が<color="red">{%}</color>増える,3
