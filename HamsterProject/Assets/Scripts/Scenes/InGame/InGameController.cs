@@ -359,13 +359,34 @@ public class InGameController : SceneControllerBase
     /// <param name="foodAreaId"></param>
     public void ShowDialogByFoodArea(int foodAreaId)
     {
-        // TODO 餌選択ダイアログ
-        FoodAreaDialog foodAreaDialog = dialogContainer.Show<FoodAreaDialog>();
-        foodAreaDialog.Initialize(
-            foodAreaId,
-            havingFoodData.havingFoodDictionary,
-            UseFood
-            );
+        List<int> RemoveIds = new List<int>();
+        foreach(KeyValuePair<int, FoodData> kvp in havingFoodData.havingFoodDictionary)
+        {
+            if(kvp.Value.count <= 0)
+            {
+                RemoveIds.Add(kvp.Key);
+            }
+        }
+
+        foreach(var id in RemoveIds)
+        {
+            havingFoodData.havingFoodDictionary.Remove(id);
+        }
+
+        if(havingFoodData.havingFoodDictionary.Count == 0)
+        {
+            TextOnlyDialog textOnlyDialog = dialogContainer.Show<TextOnlyDialog>();
+            textOnlyDialog.SetTexts("使用可能な餌がありません");
+        }
+        else
+        {
+            FoodAreaDialog foodAreaDialog = dialogContainer.Show<FoodAreaDialog>();
+            foodAreaDialog.Initialize(
+                foodAreaId,
+                havingFoodData.havingFoodDictionary,
+                UseFood
+                );
+        }
     }
 
     /// <summary>
