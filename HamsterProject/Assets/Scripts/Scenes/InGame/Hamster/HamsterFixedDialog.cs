@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class HamsterFixedDialog : DialogBase
 {
     [SerializeField] Image hamsterImage;
+
     /// <summary>
     /// ダイアログ表示
     /// </summary>

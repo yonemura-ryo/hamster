@@ -21,16 +21,57 @@ public partial class MasterDataDB
             int Id = int.Parse(line[0]);
             result.Add(Id, new HamsterMaster(
                 Id,
-                line[1],
+                int.Parse(line[1]),
                 line[2],
-                int.Parse(line[3]),
-                float.Parse(line[4])
+                line[3],
+                line[4],
+                int.Parse(line[5]),
+                float.Parse(line[6]),
+                float.Parse(line[7]),
+                int.Parse(line[8]),
+                int.Parse(line[9]),
+                int.Parse(line[10])
             ));
         }
 
         return result;
     }
-    
+
+    private Dictionary<int, HamsterBugMaster>GetHamsterBugMaster(string masterName)
+    {
+        Dictionary<int, HamsterBugMaster> result = new Dictionary<int, HamsterBugMaster>();
+
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new HamsterBugMaster(
+                Id,
+                int.Parse(line[1])
+            ));
+        }
+
+        return result;
+    }
+
+    private Dictionary<string, HamsterColorTypeMaster> GetHamsterColorTypeMaster(string masterName)
+    {
+        Dictionary<string, HamsterColorTypeMaster> result = new Dictionary<string, HamsterColorTypeMaster>();
+
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            int colorId = int.Parse(line[1]);
+            result.Add(Id + ":" + colorId, new HamsterColorTypeMaster(
+                Id,
+                int.Parse(line[1])
+            ));
+        }
+
+        return result;
+    }
+
     private Dictionary<int, FacilityMaster> GetFacilityMaster(string masterName)
     {
         Dictionary<int, FacilityMaster> result = new Dictionary<int, FacilityMaster>();
@@ -42,7 +83,9 @@ public partial class MasterDataDB
             result.Add(Id, new FacilityMaster(
                 Id,
                 line[1],
-                int.Parse(line[2])
+                line[2],
+                line[3],
+                int.Parse(line[4])
             ));
         }
 
@@ -60,7 +103,8 @@ public partial class MasterDataDB
             result.Add(Id + ":" + Level, new FacilityLevelMaster(
                 int.Parse(Id),
                 int.Parse(Level),
-                int.Parse(line[2])
+                int.Parse(line[2]),
+                line[3]
             ));
         }
 
@@ -78,8 +122,53 @@ public partial class MasterDataDB
             result.Add(Id, new FoodMaster(
                 Id,
                 line[1],
+                line[2],
+                int.Parse(line[3]),
+                int.Parse(line[4]),
+                line[5],
+                int.Parse(line[6]),
+                //float.Parse(line[7]),
+                0,
+                //int.Parse(line[8])
+                0
+            ));
+        }
+
+        return result;
+    }
+
+    private Dictionary<int, UserRankMaster> GetUserRankMaster(string masterName)
+    {
+        Dictionary<int, UserRankMaster> result = new Dictionary<int, UserRankMaster>();
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new UserRankMaster(
+                Id,
+                int.Parse(line[1]),
                 int.Parse(line[2]),
-                float.Parse(line[3])
+                int.Parse(line[3])
+            ));
+        }
+
+        return result;
+    }
+
+    public Dictionary<int, RarityLotteryMaster> GetRarityLotteryMaster(string masterName)
+    {
+        Dictionary<int, RarityLotteryMaster> result = new Dictionary<int, RarityLotteryMaster>();
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new RarityLotteryMaster(
+                Id,
+                int.Parse(line[1]),
+                int.Parse(line[2]),
+                int.Parse(line[3]),
+                int.Parse(line[4]),
+                int.Parse(line[5])
             ));
         }
 

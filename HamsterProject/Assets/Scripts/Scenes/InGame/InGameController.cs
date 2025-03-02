@@ -21,15 +21,30 @@ public class InGameController : SceneControllerBase
     /// </summary>
     private IReadOnlyDictionary<int, FacilityMaster> FacilityMaster = null;
     private IReadOnlyDictionary<int, FoodMaster> FoodMaster = null;
+    private IReadOnlyDictionary<int, UserRankMaster> UserRankMaster = null;
     
     /// <summary>
-    /// セーブデータ
+    /// [セーブデータ]施設データ
     /// </summary>
-    // TODO 一時的[SerializeField] 外す
-    [SerializeField] private FacilityListData facilityListData = null;
-    private UserCommonData userCommonData = null;
-    // TODO 一時的[SerializeField] 外す
-    [SerializeField] private HavingFoodData havingFoodData = null;
+    private FacilityListData facilityListData = null;
+    public FacilityListData FacilityListDataReadOnly => facilityListData;
+    /// <summary>
+    /// [セーブデータ]ユーザー基本データ
+    /// </summary>
+    private static UserCommonData userCommonData = null;
+    /// <summary>
+    /// [セーブデータ]参照用のユーザー基本データ
+    /// TODO ReactivePropertyでうまく作ってもいいかもしれない
+    /// </summary>
+    public static UserCommonData userCommonDataReadOnly => userCommonData;
+    /// <summary>
+    /// [セーブデータ]餌所持データ
+    /// </summary>
+    private HavingFoodData havingFoodData = null;
+    /// <summary>
+    /// [セーブデータ]捕獲済みハムデータ
+    /// </summary>
+    private HamsterCapturedListData hamsterCapturedListData = null;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
@@ -42,6 +57,7 @@ public class InGameController : SceneControllerBase
         // マスターデータの読み込み
         FacilityMaster = MasterData.DB.FacilityMaster;
         FoodMaster = MasterData.DB.FoodMaster;
+        UserRankMaster = MasterData.DB.UserRankMaster;
 
         // ユーザーデータの読み込み
         userCommonData =  LocalPrefs.Load<UserCommonData>(SaveData.Key.UserCommonData);
@@ -50,6 +66,8 @@ public class InGameController : SceneControllerBase
         {
             userCommonData = new UserCommonData();
             userCommonData.coinCount = 0;
+            userCommonData.exp = 0;
+            userCommonData.userRank = 1;
             LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
         }
         // 施設データの読み込み
@@ -66,13 +84,31 @@ public class InGameController : SceneControllerBase
             havingFoodData.havingFoodDictionary = new SerializableDictionary<int, FoodData>();
             LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
         }
-        // DebugAcquireFood(1, 5);
+
+        // 捕獲済みハムデータの読み込み
+        hamsterCapturedListData = LocalPrefs.Load<HamsterCapturedListData>(SaveData.Key.HamsterCapturedListData);
+        if(hamsterCapturedListData == null)
+        {
+            hamsterCapturedListData = new HamsterCapturedListData();
+            hamsterCapturedListData.capturedDataDictionary = new SerializableDictionary<string, HamsterCapturedData>();
+            LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+        }
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         SystemScene systemScene = SystemScene.Instance;
-        inGamePresenter.Initialize(model, dialogContainer, systemScene.SoundPlayer, systemScene.SceneTransitioner, userCommonData.coinCount);
+        inGamePresenter.Initialize(
+            model,
+            dialogContainer,
+            systemScene.SoundPlayer,
+            systemScene.SceneTransitioner,
+            userCommonDataReadOnly,
+            AddCoin,
+            AcquireFood,
+            FacilityListDataReadOnly,
+            UpdateFacilityLevel
+            );
         // 施設の初期化
-        foreach (var facilityData in facilityListData.facilities)
+        foreach ((int key,FacilityData facilityData) in facilityListData.facilityDictionary)
         {
             // facilityIdが不正値の場合はスキップ
             if(facilityData.facilityId <= 0){continue;}
@@ -90,9 +126,20 @@ public class InGameController : SceneControllerBase
         {
             // TODO 解放されてる餌場のみに限定する
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
+            // TODO 配置中の餌
         }
         // ハムの初期化
-        hamsterManager.Initialize(foodAreas,AddCoin,ConsumeFood);
+        hamsterManager.Initialize(
+            foodAreas,
+            AddCoin,
+            ConsumeFood,
+            AddExp,
+            SaveCapturedHamster,
+            GetLotteryIdByFacility,
+            GetFixTimeShortRateByFacility,
+            GetAcquireCoinExpRateByFacility,
+            IsNewHamster
+            );
     }
 
     /// <summary>
@@ -103,13 +150,13 @@ public class InGameController : SceneControllerBase
     {
         FacilityListData facilityListData = new FacilityListData();
         // TODO マスタから施設数をとる
-        facilityListData.facilities = new FacilityData[facilityCount + 1];
+        facilityListData.facilityDictionary = new SerializableDictionary<int, FacilityData>();
         for (int i = 0; i < facilityCount; i++)
         {
             FacilityData facilityData = new FacilityData();
             facilityData.facilityId = i + 1;
             facilityData.level = 0;
-            facilityListData.facilities[facilityData.facilityId] = facilityData;
+            facilityListData.facilityDictionary[facilityData.facilityId] = facilityData;
         }
         
         LocalPrefs.Save(SaveData.Key.FacilityList, facilityListData);
@@ -122,6 +169,7 @@ public class InGameController : SceneControllerBase
     /// <param name="addCoinCount"></param>
     public void AddCoin(int addCoinCount)
     {
+        Debug.Log("addCoin:" + addCoinCount);
         userCommonData.coinCount += addCoinCount;
         // 0以下は0にする(ここでは不足チェックしない)
         if (userCommonData.coinCount < 0)
@@ -129,6 +177,56 @@ public class InGameController : SceneControllerBase
             userCommonData.coinCount = 0;
         }
         inGamePresenter.UpdateCoinText(userCommonData.coinCount);
+        // ユーザーデータセーブ
+        LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
+    }
+
+    /// <summary>
+    /// 経験値付与
+    /// </summary>
+    /// <param name="addExp"></param>
+    public void AddExp(int addExp)
+    {
+        Debug.Log("addExp:" + addExp);
+        userCommonData.exp += addExp;
+        // ユーザーランク上昇判定
+        bool isRankUp = true;
+        List<int> functonReleaseIds = new List<int>();
+        while (isRankUp)
+        {
+            if (UserRankMaster.ContainsKey(userCommonData.userRank + 1))
+            {
+                UserRankMaster nextRankMaster = UserRankMaster[userCommonData.userRank + 1];
+                if(nextRankMaster.Exp <= userCommonData.exp)
+                {
+                    // レベル上昇
+                    userCommonData.userRank = nextRankMaster.Rank;
+                    if(nextRankMaster.FunctionReleaseId > 0)
+                    {
+                        functonReleaseIds.Add(nextRankMaster.FunctionReleaseId);
+                    }
+                }
+                else
+                {
+                    // 経験値未達
+                    isRankUp = false;
+                }
+            }
+            else
+            {
+                // 次のランクがない = 最大レベルとみなし経験値上限張りつきにする
+                UserRankMaster currentRankMaster = UserRankMaster[userCommonData.userRank];
+                userCommonData.exp = currentRankMaster.Exp;
+                isRankUp = false;
+            }
+        }
+        // TODO ユーザーランク上昇通知ダイアログ
+        inGamePresenter.UpdateRankText(userCommonData.userRank);
+        // TODO 機能解放実行処理
+        foreach (var functionReleaseId in functonReleaseIds)
+        {
+            //
+        }
         // ユーザーデータセーブ
         LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
     }
@@ -146,11 +244,11 @@ public class InGameController : SceneControllerBase
         // コイン消費
         AddCoin(-spendCoin);
         // 施設レベルアップ
-        facilityListData.facilities[facilityId].level++;
+        facilityListData.facilityDictionary[facilityId].level++;
         // 施設データセーブ
         LocalPrefs.Save(SaveData.Key.FacilityList, facilityListData);
         // facilityの変数更新
-        facilities[facilityId -1].UpdateMemberValue(facilityListData.facilities[facilityId].level);
+        facilities[facilityId -1].UpdateMemberValue(facilityListData.facilityDictionary[facilityId].level);
         return true;
     }
     
@@ -165,10 +263,69 @@ public class InGameController : SceneControllerBase
             facilityId,
             FacilityMaster[facilityId].Name,
             FacilityMaster[facilityId].LevelType,
-            facilityListData.facilities[facilityId].level,
+            facilityListData.facilityDictionary[facilityId].level,
             facilities[facilityId -1].FacilitySprite,
             UpdateFacilityLevel
             );
+    }
+
+    /// <summary>
+    /// 施設レベルによるハム抽選ID
+    /// </summary>
+    public int GetLotteryIdByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.rareHamster)){
+            // レベルをそのまま抽選IDとする
+            return facilityListData.facilityDictionary[FacilityDefine.TypeId.rareHamster].level;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// 施設レベルによる修正時間短縮
+    /// 返却値を修正時間にかける
+    /// </summary>
+    /// <returns></returns>
+    public float GetFixTimeShortRateByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.fixTime))
+        {
+            FacilityData facilityData = facilityListData.facilityDictionary[FacilityDefine.TypeId.fixTime];
+            if(facilityData.level == 0)
+            {
+                return 1;
+            }
+            return 1.0f - facilityData.level/10.0f;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// 施設レベルによるコインと経験値取得増加比率
+    /// 返却値を獲得量にかける
+    /// </summary>
+    /// <returns></returns>
+    public float GetAcquireCoinExpRateByFacility()
+    {
+        if (facilityListData.facilityDictionary.ContainsKey(FacilityDefine.TypeId.coinAndExp))
+        {
+            FacilityData facilityData = facilityListData.facilityDictionary[FacilityDefine.TypeId.coinAndExp];
+            if (facilityData.level == 0)
+            {
+                return 1;
+            }
+            return 1.0f + facilityData.level;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
     /// <summary>
@@ -179,12 +336,18 @@ public class InGameController : SceneControllerBase
     public void UseFood(int foodAreaId, int foodId)
     {
         // TODO 餌の配置と消費時間管理
-        foodAreas[foodAreaId].SetFood(foodId);
         FoodMaster foodMasterData = FoodMaster[foodId];
-        Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
-            .Subscribe (delay => {
-                foodAreas[foodAreaId].SetEmptyFood();
-            });
+        foodAreas[foodAreaId].SetFood(foodId, foodMasterData.LotteryId);
+
+        // TODO 一旦餌の消滅はなしにする
+        //Observable.Timer (TimeSpan.FromMilliseconds (foodMasterData.Duration * 1000))
+        //    .Subscribe (delay => {
+        //        foodAreas[foodAreaId].SetEmptyFood();
+        //    });
+        //    .AddTo(this);
+
+        // ハムスター出現タイマー
+        hamsterManager.HamsterAppearTimer(foodAreaId);
         // 餌消費
         havingFoodData.havingFoodDictionary[foodId].count--;
         LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
@@ -196,19 +359,108 @@ public class InGameController : SceneControllerBase
     /// <param name="foodAreaId"></param>
     public void ShowDialogByFoodArea(int foodAreaId)
     {
-        // TODO 餌選択ダイアログ
-        FoodAreaDialog foodAreaDialog = dialogContainer.Show<FoodAreaDialog>();
-        foodAreaDialog.Initialize(
-            foodAreaId,
-            havingFoodData.havingFoodDictionary,
-            UseFood
-            );
+        List<int> RemoveIds = new List<int>();
+        foreach(KeyValuePair<int, FoodData> kvp in havingFoodData.havingFoodDictionary)
+        {
+            if(kvp.Value.count <= 0)
+            {
+                RemoveIds.Add(kvp.Key);
+            }
+        }
+
+        foreach(var id in RemoveIds)
+        {
+            havingFoodData.havingFoodDictionary.Remove(id);
+        }
+
+        if(havingFoodData.havingFoodDictionary.Count == 0)
+        {
+            TextOnlyDialog textOnlyDialog = dialogContainer.Show<TextOnlyDialog>();
+            textOnlyDialog.SetTexts("使用可能な餌がありません");
+        }
+        else
+        {
+            FoodAreaDialog foodAreaDialog = dialogContainer.Show<FoodAreaDialog>();
+            foodAreaDialog.Initialize(
+                foodAreaId,
+                havingFoodData.havingFoodDictionary,
+                UseFood
+                );
+        }
     }
 
+    /// <summary>
+    /// 餌の獲得
+    /// </summary>
+    /// <param name="foodId"></param>
+    /// <param name="num"></param>
+    public void AcquireFood(int foodId, int num)
+    {
+        if (!havingFoodData.havingFoodDictionary.TryGetValue(foodId, out FoodData currentFoodData))
+        {
+            var foodData = new FoodData();
+            foodData.foodId = foodId;
+            // 所持数マイナスを防ぐ(ここではハンドリングしない)
+            if(num < 0)
+            {
+                num = 0;
+            }
+            foodData.count = num;
+            havingFoodData.havingFoodDictionary[foodId] = foodData;
+        }
+        else
+        {
+            havingFoodData.havingFoodDictionary[foodId].count += num;
+        }
+        LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
+    }
+
+    /// <summary>
+    /// ハムスター出現による餌消費
+    /// </summary>
+    /// <param name="foodAreaId"></param>
     public void ConsumeFood(int foodAreaId)
     {
         foodAreas[foodAreaId].SetEmptyFood();
         // TODO 餌消費Timerの削除
+    }
+
+    /// <summary>
+    /// 獲得ハムスターの保存
+    /// </summary>
+    /// <param name="hamsterId"></param>
+    /// <param name="colorId"></param>
+    public void SaveCapturedHamster(int hamsterId, int colorId)
+    {
+        string key = hamsterId + ":" + colorId;
+        if (hamsterCapturedListData.capturedDataDictionary.ContainsKey(key))
+        {
+            // カウントアップ
+            HamsterCapturedData hamsterCapturedData = hamsterCapturedListData.capturedDataDictionary[key];
+            hamsterCapturedData.capturedCount++;
+            hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
+        } else
+        {
+            // 初回入手
+            HamsterCapturedData hamsterCapturedData = new HamsterCapturedData();
+            hamsterCapturedData.hamsterId = hamsterId;
+            hamsterCapturedData.colorId = colorId;
+            hamsterCapturedData.capturedCount = 1;
+            hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
+        }
+        LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+    }
+
+    /// <summary>
+    /// 新規ハムスターか
+    /// </summary>
+    /// <param name="hamsterId"></param>
+    /// <param name="colorId"></param>
+    /// <returns></returns>
+    public bool IsNewHamster(int hamsterId, int colorId)
+    {
+        string key = hamsterId + ":" + colorId;
+        return hamsterCapturedListData.capturedDataDictionary.ContainsKey(key);
     }
 
     /// <summary>
@@ -220,7 +472,8 @@ public class InGameController : SceneControllerBase
         debugDialog.Initialize(
             AddCoin,
             DebugClearPlayerPrefs,
-            DebugAcquireFood
+            AcquireFood,
+            AddExp
             );
     }
 
@@ -233,26 +486,5 @@ public class InGameController : SceneControllerBase
         LocalPrefs.DeleteAll();
         // 初期化を走らせておく
         Initialize();
-    }
-
-    /// <summary>
-    /// [デバッグ]餌付与
-    /// </summary>
-    /// <param name="foodId"></param>
-    /// <param name="num"></param>
-    public void DebugAcquireFood(int foodId, int num)
-    {
-        if (!havingFoodData.havingFoodDictionary.TryGetValue(foodId, out FoodData currentFoodData))
-        {
-            var foodData = new FoodData();
-            foodData.foodId = foodId;
-            foodData.count = num;
-            havingFoodData.havingFoodDictionary[foodId] = foodData;
-        }
-        else
-        {
-            havingFoodData.havingFoodDictionary[foodId].count += num;
-        }
-        LocalPrefs.Save(SaveData.Key.HavingFoodData, havingFoodData);
     }
 }

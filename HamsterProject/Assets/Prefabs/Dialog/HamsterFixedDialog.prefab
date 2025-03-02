@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 439837691811901947}
   - component: {fileID: 7462937930846636612}
   - component: {fileID: 3341390730449958003}
-  - component: {fileID: 1319546291310458235}
+  - component: {fileID: 7385806855544230096}
   m_Layer: 5
   m_Name: HamsterFixedDialog
   m_TagString: Untagged
@@ -203,7 +203,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1319546291310458235
+--- !u!114 &7385806855544230096
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

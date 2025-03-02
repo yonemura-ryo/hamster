@@ -8,7 +8,6 @@ public class MenuDialog : DialogBase
 {
     [SerializeField] CustomButton BookButton  = null; // 図鑑
     [SerializeField] CustomButton ShopButton  = null; // ショップ
-    [SerializeField] CustomButton EnhanceButton  = null; // 強化
     [SerializeField] CustomButton MissionButton  = null; // ミッション
     [SerializeField] CustomButton HowToButton  = null; // 遊び方
     [SerializeField] CustomButton SettingsButton  = null; // 設定
@@ -28,11 +27,6 @@ public class MenuDialog : DialogBase
         }).AddTo(this);
 
         ShopButton.OnClickAsObservable().Subscribe(_ =>
-        {
-
-        }).AddTo(this);
-
-        EnhanceButton.OnClickAsObservable().Subscribe(_ =>
         {
 
         }).AddTo(this);
