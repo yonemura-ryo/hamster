@@ -25,8 +25,9 @@ public class Hamster : MonoBehaviour
 {
     [SerializeField] Image hamsterImage;
     [SerializeField] Image newIconImage;
-    [SerializeField] TextMeshProUGUI fixCountDownText;
+    [SerializeField] TextMeshPro fixCountDownText;
     [SerializeField] TextMeshProUGUI debugHamInfoText;
+    [SerializeField] BoxCollider boxCollider;
 
     private int hamsterId = 0;
     private int hamsterRarity = 0;
@@ -48,6 +49,10 @@ public class Hamster : MonoBehaviour
     private Action<int, float> _startBugFixAction;
     private int _hamsterIndex = 0;
 
+    // TODO どっかからとってくる
+    //public GameObject hamsterObject;
+    private SpriteRenderer hamsterSpriteRenderer;
+
     /// <summary>
     /// 初期化
     /// </summary>
@@ -60,7 +65,8 @@ public class Hamster : MonoBehaviour
     public void Initialize(
         int hamsterId,
         int hamsterIndex,
-        Transform position,
+        //Transform position, // TODO 削除予定
+        GameObject hamsterObject,
         Action<int, string, int> finishFixAction,
         int hamsterRarity,
         string imagePath,
@@ -87,17 +93,40 @@ public class Hamster : MonoBehaviour
         this.bugFixReward = bugFixReward;
         this.colorId = colorId;
         _startBugFixAction = startBugFixAction;
-        _rectTransform = GetComponent<RectTransform>();
-        _rectTransform.localPosition = position.localPosition;
-        hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
+        //_rectTransform = GetComponent<RectTransform>();
+        //_rectTransform.localPosition = position.localPosition;
+        //hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
 
         if (isNew)
         {
-            newIconImage.gameObject.SetActive(true);
+            //newIconImage.gameObject.SetActive(true);
         }
 
         // デバッグ用
-        debugHamInfoText.text = "ham:" + hamsterId + " rare:" + hamsterRarity + " bug:" + bugId;
+        //debugHamInfoText.text = "ham:" + hamsterId + " rare:" + hamsterRarity + " bug:" + bugId;
+
+        // Hamster側でそれぞれのハムスターのモデルを生成する
+        // TODO hamsterObjectは種別に応じたものを生成する
+        GameObject ham = Instantiate(hamsterObject);
+        ham.transform.SetParent(this.transform);
+        ham.transform.localPosition = Vector3.zero;
+
+        // hamsterObjectのSpriteRendererに合わせてboxColliderのXYとCenterを変える
+        hamsterSpriteRenderer = ham.transform.GetComponent<SpriteRenderer>();
+        hamsterSpriteRenderer.color = Color.black;
+        Vector2 worldSize = new Vector2(
+                    hamsterSpriteRenderer.sprite.bounds.size.x * ham.transform.lossyScale.x,
+                    hamsterSpriteRenderer.sprite.bounds.size.y * ham.transform.lossyScale.y
+                );
+        // サイズを変更
+        Vector3 size = boxCollider.size;
+        size.x = worldSize.x;
+        size.y = worldSize.y;
+        boxCollider.size = size;
+        // センターを変更
+        Vector3 center = boxCollider.center;
+        center.y = worldSize.y / 2;
+        boxCollider.center = center;
     }
 
     /// <summary>
@@ -178,8 +207,9 @@ public class Hamster : MonoBehaviour
                 //finishBugFixDatetime = DateTime.MinValue;
                 // 修正が完了しているので通常ハム獲得のち初期化
                 // TODO 元のハムスター表示に戻す処理
-                hamsterImage.color = Color.white;
-                hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
+                //hamsterImage.color = Color.white;
+                hamsterSpriteRenderer.color = Color.white;
+                //hamsterImage.sprite = Resources.Load<Sprite>(GetHamsterImagePath());
                 InitalizeCountDonwText(Color.white, false);
                 _finishFixAction(_hamsterIndex, GetFixedHamsterImagePath(), colorId);
                 break;
@@ -195,7 +225,8 @@ public class Hamster : MonoBehaviour
     /// </summary>
     public void MakeSilhouette()
     {
-        hamsterImage.color = Color.black;
+        //hamsterImage.color = Color.black;
+        hamsterSpriteRenderer.color = Color.black;
         // カウントダウンテキスト表示
         InitalizeCountDonwText(Color.white);
     }
@@ -208,17 +239,16 @@ public class Hamster : MonoBehaviour
     {
         hamsterStatus = HamsterStatus.Appear;
         InitalizeCountDonwText(Color.white, false);
-        hamsterImage.color = Color.white;
+        //hamsterImage.color = Color.white;
+        hamsterSpriteRenderer.color = Color.white;
         switch (_bugId)
         {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                // TODO 仮　色を変える
-                hamsterImage.color = Color.red;
+            case 99:
+                // 何もしない
                 break;
             default:
+                // TODO 仮　色を変える
+                hamsterSpriteRenderer.color = Color.red;
                 break;
         }
     }
@@ -245,6 +275,7 @@ public class Hamster : MonoBehaviour
     public void MakeBugFixed()
     {
         hamsterStatus = HamsterStatus.BugFixed;
+        hamsterSpriteRenderer.color = Color.white;
         UpdateFixCountDownTextByMessage("fixed!!");
     }
 
@@ -276,5 +307,11 @@ public class Hamster : MonoBehaviour
     public void UpdateFixCountDownTextByMessage(string message)
     {
         fixCountDownText.text = message;
+    }
+
+    // TODO 初期化時にやるようなことをデバッグで書いてみたので別で本実装
+    public void DebugOnClick()
+    {
+        Debug.Log("hamu click");
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: -5728563395143707726}
   - component: {fileID: 1078500602433181735}
   m_Layer: 5
-  m_Name: HamsterPrefab
+  m_Name: Before_HamsterPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

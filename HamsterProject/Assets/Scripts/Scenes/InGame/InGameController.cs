@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using UnityEngine.EventSystems;
 
 public class InGameController : SceneControllerBase
 {
@@ -49,11 +50,16 @@ public class InGameController : SceneControllerBase
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
 
+    private Camera mainCamera;
+
     /// <summary>
     /// ������
     /// </summary>
     protected override void Initialize()
     {
+        // メインカメラ設定
+        mainCamera = Camera.main;
+
         // マスターデータの読み込み
         FacilityMaster = MasterData.DB.FacilityMaster;
         FoodMaster = MasterData.DB.FoodMaster;
@@ -127,6 +133,8 @@ public class InGameController : SceneControllerBase
             // TODO 解放されてる餌場のみに限定する
             foodAreas[i].Initialize(i, ShowDialogByFoodArea);
             // TODO 配置中の餌
+            // TODO 仮で雑に設置しているので削除
+            //foodAreas[i].SetFood(1, 1);
         }
         // ハムの初期化
         hamsterManager.Initialize(
@@ -140,6 +148,54 @@ public class InGameController : SceneControllerBase
             GetAcquireCoinExpRateByFacility,
             IsNewHamster
             );
+    }
+
+    private void Update()
+    {
+        // タップまたはマウスクリックの入力チェック
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!EventSystem.current.IsPointerOverGameObject())
+            {
+                SelectObject(Input.mousePosition);
+            }
+
+        }
+#elif UNITY_IOS || UNITY_ANDROID
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            // タッチIDに対してチェックが必要
+            if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+            {
+                SelectObject(touch.position);
+            }
+        }
+#endif
+    }
+
+    private void SelectObject(Vector2 screenPosition)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            GameObject selectedObject = hit.collider.gameObject;
+            if (selectedObject.CompareTag("Hamster"))
+            {
+                //Debug.Log("選択されたオブジェクト: " + selectedObject.name);
+                Hamster hamster = selectedObject.GetComponent<Hamster>();
+                hamster.OnClickHamster();
+            }
+
+            if (selectedObject.CompareTag("Dish"))
+            {
+                FoodArea foodArea = selectedObject.GetComponent<FoodArea>();
+                foodArea.OnClickFoodArea();
+            }
+        }
     }
 
     /// <summary>
