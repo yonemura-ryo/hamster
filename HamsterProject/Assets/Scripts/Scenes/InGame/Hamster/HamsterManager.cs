@@ -35,9 +35,18 @@ public class HamsterManager : MonoBehaviour
     /// </summary>
     [SerializeField]private GameObject hamsterPrefab;
 
-    [SerializeField] private List<Transform> itemPositions;
+    /// <summary>
+    /// ハムスターの出現位置
+    /// </summary>
+    [SerializeField] private List<Transform> hamsterAreaPositions;
     
     [SerializeField] private DialogContainer dialogContainer = null;
+
+    /// <summary>
+    /// 生成するハムスターのモデルリスト
+    /// TODO 指定ディレクトリからIDで取得する方法に将来的に変更する
+    /// </summary>
+    [SerializeField] private List<GameObject> hamsterModelList;
     
     private int itemPositionNum = 3;
     //private int bugHumsterNum = 1;
@@ -78,14 +87,14 @@ public class HamsterManager : MonoBehaviour
     private void Start()
     {
         // TODO アイテム位置の処理は規定値からとるように修正する
-        if (itemPositions.Count < itemPositionNum)
-        {
-            var makeCount = itemPositionNum - itemPositions.Count;
-            for (int i = 0; i < makeCount; i++)
-            {
-                itemPositions.Add(this.transform);
-            }
-        }
+        //if (hamsterAreaPositions.Count < itemPositionNum)
+        //{
+        //    var makeCount = itemPositionNum - hamsterAreaPositions.Count;
+        //    for (int i = 0; i < makeCount; i++)
+        //    {
+        //        hamsterAreaPositions.Add(this.transform);
+        //    }
+        //}
     }
 
     /// <summary>
@@ -103,6 +112,11 @@ public class HamsterManager : MonoBehaviour
         Func<int, int, bool>isNewHamster
      )
     {
+        // 整合性チェック
+        if (foodAreaList.Count != hamsterAreaPositions.Count)
+        {
+            throw new Exception("ハムスターの出現位置数と餌場のリスト数が不一致です");
+        }
         // TODO 2回目以降の初期化呼び出しでも正常に処理できるように修正
         this.foodAreaList = foodAreaList;
         this.addCoin = addCoin;
@@ -167,6 +181,12 @@ public class HamsterManager : MonoBehaviour
     /// </summary>
     private void HamsterAppear(FoodArea foodArea, int areaIndex)
     {
+        // すでにハムが出現済みならスキップ
+        if (hamsterList.TryGetValue(areaIndex, out Hamster existHamster))
+        {
+            return;
+        }
+
         int foodId = foodArea.GetExistFoodId();
         // 餌配置済み
         if (foodId > 0)
@@ -211,8 +231,17 @@ public class HamsterManager : MonoBehaviour
     /// <param name="bNeedSave">TODO セーブするかフラグ。いらない気がする</param>
     private void HamsterInstantiate(HamsterMaster hamsterMasterData, int areaIndex, int colorId, HamsterData hamsterSaveData=null, bool bNeedSave=true)
     {
+        // TODO 改修
+        /**
+         * ハムスター出現箇所は餌置き場のHamsterRoot/HamsterArea01~とする
+         * 指定のHamsterAreaの子オブジェクトとしてHamsterBaseを生成する
+         *
+         * Hamster側でそれぞれのハムスターのモデルを生成する
+         * 
+        **/
         GameObject hamsterObject = Instantiate(hamsterPrefab);
-        hamsterObject.transform.SetParent(hamstersCanvas.transform);
+        hamsterObject.transform.SetParent(hamsterAreaPositions[areaIndex]);
+        hamsterObject.transform.localPosition = Vector3.zero;
         Hamster hamster = hamsterObject.GetComponent<Hamster>();
         // バグ出現時間
         float bugAppearTime = hamsterMasterData.BugAppearTime;
@@ -230,11 +259,33 @@ public class HamsterManager : MonoBehaviour
                 bugFixTime = bugFixTimeSpan.Seconds;
             }
         }
+        // 生成すべきハムスターのモデルオブジェクトを取得する
+        // HamsterIdの先頭2~3桁を取得し、int値にキャストする
+        // hamsterModelListに上記値-1でindex参照し、Listになければindex0を使う
+        // 数値を文字列に変換
+        string numberStr = hamsterMasterData.HamsterId.ToString();
+        // 2～3文字目を切り出し（インデックス1から2文字）
+        string subStr = numberStr.Substring(1, 2);
+        // int に変換
+        int.TryParse(subStr, out int modelIndex);
+        Debug.Log("modelIndex:" + modelIndex);
+        GameObject hamsterModel = null;
+        if(hamsterModelList.Count >= modelIndex)
+        {
+            // 存在する
+            hamsterModel = hamsterModelList[modelIndex - 1];
+        } else
+        {
+            hamsterModel = hamsterModelList[0];
+        }
+
+
         HamsterBugMaster bugMaster = hamsterBugMaster[hamsterMasterData.BugId];
         hamster.Initialize(
             hamsterMasterData.HamsterId,
             areaIndex,
-            itemPositions[areaIndex],
+            hamsterModel, // TODO ハムオブジェクト
+            //hamsterAreaPositions[areaIndex],
             ShowDialogByFixedHamster,
             hamsterMasterData.Rare,
             hamsterMasterData.ImagePath,
@@ -385,6 +436,8 @@ public class HamsterManager : MonoBehaviour
                 int lotteryBug = GetRarityByRandom(rarityLottery);
                 bugMaster = hamsterBugMaster
                     .Where(x => x.Value.Rare == lotteryBug)
+                    // TODO 99はバグなし(定数化する)
+                    .Where(x => x.Value.BugId != 99)
                     .OrderBy(x => Guid.NewGuid())
                     .FirstOrDefault()
                     .Value;

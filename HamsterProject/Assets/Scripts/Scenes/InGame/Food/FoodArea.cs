@@ -24,15 +24,17 @@ public class FoodArea : MonoBehaviour
     [SerializeField] private Sprite emptyFoodSprite;
     [SerializeField] private Sprite fullFoodSprite;
     [SerializeField] private EventTrigger eventTrigger;
+    [SerializeField] private GameObject foodObject;
     public void Initialize(int foodAreaId, Action<int> showFoodAreaDialog)
     {
         this.foodAreaId = foodAreaId;
         this.showFoodAreaDialog = showFoodAreaDialog;
+        foodObject.SetActive(false);
 
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = EventTriggerType.PointerClick;
-        entry.callback.AddListener( (x) => OnClickFoodArea() );
-        eventTrigger.triggers.Add(entry);
+        //EventTrigger.Entry entry = new EventTrigger.Entry();
+        //entry.eventID = EventTriggerType.PointerClick;
+        //entry.callback.AddListener( (x) => OnClickFoodArea() );
+        //eventTrigger.triggers.Add(entry);
     }
 
     public int GetExistFoodId()
@@ -61,7 +63,8 @@ public class FoodArea : MonoBehaviour
     {
         existFoodId = foodId;
         existLotteryId = lotteryId;
-        foodAreaImage.sprite = fullFoodSprite;
+        //foodAreaImage.sprite = fullFoodSprite;
+        foodObject.SetActive(true);
     }
 
     /// <summary>
@@ -71,6 +74,7 @@ public class FoodArea : MonoBehaviour
     {
         existFoodId = 0;
         existLotteryId = 0;
-        foodAreaImage.sprite = emptyFoodSprite;
+        //foodAreaImage.sprite = emptyFoodSprite;
+        foodObject.SetActive(false);
     }
 }
