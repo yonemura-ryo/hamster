@@ -19,6 +19,7 @@ public class InGamePresenter : MonoBehaviour
 
     [SerializeField] private CustomButton MenuButton = null;
     [SerializeField] private CustomButton ShopButton = null;
+    [SerializeField] private CustomButton bookButton = null;
 
     /// <summary>
     /// Initialize.
@@ -30,6 +31,7 @@ public class InGamePresenter : MonoBehaviour
         ISoundPlayer soundPlayer,
         ISceneTransitioner sceneTransitioner,
         UserCommonData userCommonData,
+        HamsterCapturedListData hamsterCapturedListData,
         Action<int> acquireCoin,
         Action<int, int> acquireFood,
         FacilityListData facilityListData,
@@ -60,6 +62,13 @@ public class InGamePresenter : MonoBehaviour
                 facilityListData,
                 updateFacilityLevel
                 );
+        }).AddTo(this);
+
+        // 図鑑
+        bookButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            BookDialog bookDialog = dialogContainer.Show<BookDialog>(null);
+            bookDialog.Initialize(dialogContainer, hamsterCapturedListData);
         }).AddTo(this);
     }
 

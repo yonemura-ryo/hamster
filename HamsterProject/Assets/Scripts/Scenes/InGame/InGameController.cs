@@ -46,6 +46,7 @@ public class InGameController : SceneControllerBase
     /// [セーブデータ]捕獲済みハムデータ
     /// </summary>
     private HamsterCapturedListData hamsterCapturedListData = null;
+    public HamsterCapturedListData hamsterCapturedListDataReadOnly => hamsterCapturedListData;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
@@ -108,6 +109,7 @@ public class InGameController : SceneControllerBase
             systemScene.SoundPlayer,
             systemScene.SceneTransitioner,
             userCommonDataReadOnly,
+            hamsterCapturedListDataReadOnly,
             AddCoin,
             AcquireFood,
             FacilityListDataReadOnly,
