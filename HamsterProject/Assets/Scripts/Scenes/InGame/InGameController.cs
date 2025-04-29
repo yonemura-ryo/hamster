@@ -46,6 +46,7 @@ public class InGameController : SceneControllerBase
     /// [セーブデータ]捕獲済みハムデータ
     /// </summary>
     private HamsterCapturedListData hamsterCapturedListData = null;
+    public HamsterCapturedListData hamsterCapturedListDataReadOnly => hamsterCapturedListData;
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
@@ -108,6 +109,7 @@ public class InGameController : SceneControllerBase
             systemScene.SoundPlayer,
             systemScene.SceneTransitioner,
             userCommonDataReadOnly,
+            hamsterCapturedListDataReadOnly,
             AddCoin,
             AcquireFood,
             FacilityListDataReadOnly,
@@ -529,7 +531,9 @@ public class InGameController : SceneControllerBase
             AddCoin,
             DebugClearPlayerPrefs,
             AcquireFood,
-            AddExp
+            AddExp,
+            DebugCaptureAllHamster,
+            DebugReleaseAllHamster
             );
     }
 
@@ -542,5 +546,27 @@ public class InGameController : SceneControllerBase
         LocalPrefs.DeleteAll();
         // 初期化を走らせておく
         Initialize();
+    }
+
+    /// <summary>
+    /// [デバッグ]ハムスター未所持化
+    /// </summary>
+    public void DebugReleaseAllHamster()
+    {
+        hamsterCapturedListData.capturedDataDictionary.Clear();
+        LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+    }
+
+    /// <summary>
+    /// [デバッグ]ハムスター全所持化
+    /// </summary>
+    public void DebugCaptureAllHamster()
+    {
+        IReadOnlyDictionary<int, HamsterMaster> hamsterMaster = MasterData.DB.HamsterMaster;
+        foreach (var hamsterKeyValue in hamsterMaster)
+        {
+            HamsterMaster hamster = hamsterKeyValue.Value;
+            SaveCapturedHamster(hamster.HamsterId, hamster.ColorTypeId);
+        }
     }
 }
