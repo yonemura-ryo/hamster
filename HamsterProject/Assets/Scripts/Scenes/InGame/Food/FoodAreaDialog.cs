@@ -9,6 +9,7 @@ public class FoodAreaDialog : DialogBase
 {
     [SerializeField] private GameObject foodContentPrefab;
     [SerializeField] private Transform scrollViewContentTransform;
+    [SerializeField] private TextMeshProUGUI descriptionText;
     private int foodAreaId;
     private Action<int, int> parentUseFood;
     
@@ -19,6 +20,7 @@ public class FoodAreaDialog : DialogBase
     /// <param name="parentUseFood"></param>
     public void Initialize(int foodAraaId, SerializableDictionary<int, FoodData> havingFoodDictionary, Action<int, int>parentUseFood)
     {
+        descriptionText.text = "";
         IReadOnlyDictionary<int, FoodMaster> foodMasters = MasterData.DB.FoodMaster;
         this.foodAreaId = foodAraaId;
         this.parentUseFood = parentUseFood;
@@ -31,10 +33,14 @@ public class FoodAreaDialog : DialogBase
             GameObject foodContentObject =  Instantiate(foodContentPrefab, Vector3.zero, Quaternion.identity, scrollViewContentTransform);
             foodContentObject.GetComponent<FoodContent>().Initialize(
                 havingFood.foodId,
-                $"Images/Foods/food_{havingFood.foodId}",
+                $"2DAssets/Images/SpriteAtlasImages/item/item_{havingFood.foodId}",
                 foodMasters[id].Name,
                 havingFood.count,
-                UseFood
+                UseFood,
+                () =>
+                {
+                    descriptionText.text = foodMasters[id].Description;
+                }
                 );
         }
     }

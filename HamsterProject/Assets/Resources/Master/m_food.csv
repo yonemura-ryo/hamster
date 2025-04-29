@@ -1,7 +1,10 @@
 food_id,name,image_path,fix_time_rate,lottery_id,description,price
 ,,,(%),,,購入金額
-1,ひまわりの種,food_1,100,1,<color=red>ちょっと</color>バグハムが集まりやすい,10
-2,ペレット,food_2,95,1,<color=red>すこし</color>バグハムが集まりやすい,50
-3,完全食,food_3,100,2,<color=red>とても</color>バグハムが集まりやすい,500
-4,チーズ,food_4,100,3,<color=red>すごく</color>バグハムが集まりやすい,1000
-5,バナナ,food_5,80,4,<color=red>ものすごく</color>バグハムが集まりやすい,10000
+1,ペレット,food_1,100,1,<color=red>ちょっと</color>バグハムが集まりやすい,10
+2,乾燥野菜,food_2,100,2,<color=red>ちょっと</color>バグハムが集まりやすい,20
+3,ドライフルーツ（パイナップル、バナナ）,food_3,100,3,<color=red>すこし</color>バグハムが集まりやすい,30
+4,ひまわりの種,food_4,100,4,<color=red>すこし</color>バグハムが集まりやすい,40
+5,にんじん,food_5,100,5,<color=red>とても</color>バグハムが集まりやすい,50
+6,ブロッコリー,food_6,100,6,<color=red>とても</color>バグハムが集まりやすい,60
+7,かぼちゃ,food_7,100,7,<color=red>すごく</color>バグハムが集まりやすい,70
+8,キャベツ,food_8,100,8,<color=red>ものすごく</color>バグハムが集まりやすい,80
