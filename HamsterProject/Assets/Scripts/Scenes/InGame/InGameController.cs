@@ -531,7 +531,9 @@ public class InGameController : SceneControllerBase
             AddCoin,
             DebugClearPlayerPrefs,
             AcquireFood,
-            AddExp
+            AddExp,
+            DebugCaptureAllHamster,
+            DebugReleaseAllHamster
             );
     }
 
@@ -544,5 +546,27 @@ public class InGameController : SceneControllerBase
         LocalPrefs.DeleteAll();
         // 初期化を走らせておく
         Initialize();
+    }
+
+    /// <summary>
+    /// [デバッグ]ハムスター未所持化
+    /// </summary>
+    public void DebugReleaseAllHamster()
+    {
+        hamsterCapturedListData.capturedDataDictionary.Clear();
+        LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+    }
+
+    /// <summary>
+    /// [デバッグ]ハムスター全所持化
+    /// </summary>
+    public void DebugCaptureAllHamster()
+    {
+        IReadOnlyDictionary<int, HamsterMaster> hamsterMaster = MasterData.DB.HamsterMaster;
+        foreach (var hamsterKeyValue in hamsterMaster)
+        {
+            HamsterMaster hamster = hamsterKeyValue.Value;
+            SaveCapturedHamster(hamster.HamsterId, hamster.ColorTypeId);
+        }
     }
 }

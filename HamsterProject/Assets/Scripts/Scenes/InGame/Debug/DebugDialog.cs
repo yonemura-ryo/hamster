@@ -18,9 +18,19 @@ public class DebugDialog : DialogBase
     [SerializeField] private Button acquireFoodButton;
     [SerializeField] private Button notificationButton;
     [SerializeField] private Button addExpButton;
+    [SerializeField] private Button captureHamButton;
+    [SerializeField] private Button releaseHamButton;
 
-    
-    public void Initialize(Action<int> addCoin, Action clearData, Action<int,int> acquireFood, Action<int> addExp)
+
+
+    public void Initialize(
+        Action<int> addCoin,
+        Action clearData,
+        Action<int,int> acquireFood,
+        Action<int> addExp,
+        Action captureAllHamster,
+        Action releaseAllHamster
+        )
     {
         this.addCoin = addCoin;
         this.clearData = clearData;
@@ -34,6 +44,8 @@ public class DebugDialog : DialogBase
         acquireFoodButton.onClick.AddListener(OnClickAcquireFood);
         notificationButton.onClick.AddListener(OnClickNotification);
         addExpButton.onClick.AddListener(OnClickAddExp);
+        captureHamButton.onClick.AddListener(()=>captureAllHamster());
+        releaseHamButton.onClick.AddListener(() => releaseAllHamster());
     }
 
     public void OnClickAddCoin()

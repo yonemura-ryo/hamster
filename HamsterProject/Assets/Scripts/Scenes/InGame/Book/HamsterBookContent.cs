@@ -21,10 +21,10 @@ public class HamsterBookContent : MonoBehaviour
 
     public void Initialize(HamsterDetail hamsterDetail, Action<HamsterDetail> openDetailDialog)
     {
+        numberText.text = "No." + hamsterDetail.Id;
         if (hamsterDetail.IsCaptured)
         {
             //捕獲済み
-            numberText.text = "No." + hamsterDetail.Id;
             nameText.text = hamsterDetail.Name;
             hamsterImage.sprite = hamsterDetail.HamsterSprite;
         } else
