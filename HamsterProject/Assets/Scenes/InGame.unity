@@ -2762,6 +2762,7 @@ MonoBehaviour:
   - {fileID: 693984594}
   - {fileID: 376443693}
   - {fileID: 244657665}
+  mainCamera: {fileID: 1806391759}
 --- !u!1001 &1254111884
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4147,6 +4148,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5ecaa5d243cfb8a4196917126fed3333, type: 3}
+--- !u!20 &1806391759 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 807954430891817966, guid: 5ecaa5d243cfb8a4196917126fed3333, type: 3}
+  m_PrefabInstance: {fileID: 1806391758}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1808123153
 PrefabInstance:
   m_ObjectHideFlags: 0

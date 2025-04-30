@@ -51,16 +51,13 @@ public class InGameController : SceneControllerBase
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
 
-    private Camera mainCamera;
+    [SerializeField] private Camera mainCamera;
 
     /// <summary>
     /// ������
     /// </summary>
     protected override void Initialize()
     {
-        // メインカメラ設定
-        mainCamera = Camera.main;
-
         // マスターデータの読み込み
         FacilityMaster = MasterData.DB.FacilityMaster;
         FoodMaster = MasterData.DB.FoodMaster;
