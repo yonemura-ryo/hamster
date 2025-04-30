@@ -11,13 +11,16 @@ public class SettingDialog : DialogBase
     [SerializeField] private Slider seSlider = null;
     [SerializeField] private Slider masterSlider = null;
 
-    [SerializeField] private TextMeshProUGUI bgmVolumeText = null;
-    [SerializeField] private TextMeshProUGUI seVolumeText = null;
-    [SerializeField] private TextMeshProUGUI masterVolumeText = null;
+    //[SerializeField] private TextMeshProUGUI bgmVolumeText = null;
+    //[SerializeField] private TextMeshProUGUI seVolumeText = null;
+    //[SerializeField] private TextMeshProUGUI masterVolumeText = null;
 
     [SerializeField] private CustomButton privacyButton = null;
     [SerializeField] private CustomButton serviceButton = null;
+    [SerializeField] private CustomButton staffButton = null;
     [SerializeField] private CustomButton deleteDataButton = null;
+
+    private IDialogContainer dialogContainer;
 
     /// <summary>
     /// ダイアログ表示
@@ -41,8 +44,9 @@ public class SettingDialog : DialogBase
     /// <param name="soundPlayer">サウンドプレイヤー</param>
     /// <param name="sceneTransitioner">シーン遷移用</param>
     /// <param name="soundVolume">サウンドボリューム</param>
-    public void Initialize(ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner)
+    public void Initialize(IDialogContainer dialogContainer, ISoundPlayer soundPlayer, ISceneTransitioner sceneTransitioner)
     {
+        this.dialogContainer = dialogContainer;
         bgmSlider.value = soundPlayer.GetBgmVolume();
         seSlider.value = soundPlayer.GetSeVolume();
         masterSlider.value = soundPlayer.GetMasterVolume();
@@ -50,27 +54,34 @@ public class SettingDialog : DialogBase
         bgmSlider.OnValueChangedAsObservable().Subscribe(volume =>
         {
             soundPlayer?.SetBgmVolume(volume);
-            bgmVolumeText.text = $"{Mathf.Floor(volume * 100)}";
+            //bgmVolumeText.text = $"{Mathf.Floor(volume * 100)}";
         }).AddTo(this);
 
         seSlider.OnValueChangedAsObservable().Subscribe(volume =>
         {
             soundPlayer?.SetSeVolume(volume);
-            seVolumeText.text = $"{Mathf.Floor(volume * 100)}";
+            //seVolumeText.text = $"{Mathf.Floor(volume * 100)}";
         }).AddTo(this);
 
         masterSlider.OnValueChangedAsObservable().Subscribe(volume =>
         {
             soundPlayer?.SetMasterVolume(volume);
-            masterVolumeText.text = $"{Mathf.Floor(volume * 100)}";
+            //masterVolumeText.text = $"{Mathf.Floor(volume * 100)}";
         }).AddTo(this);
 
         privacyButton.OnClickAsObservable().Subscribe(_ =>
         {
-
+            dialogContainer?.Show<PrivacyPolicyDialog>(OnCloseNextDialog);
+            gameObject.SetActive(false);
         }).AddTo(this);
 
         serviceButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            dialogContainer?.Show<LicenseDialog>(OnCloseNextDialog);
+            gameObject.SetActive(false);
+        }).AddTo(this);
+
+        staffButton.OnClickAsObservable().Subscribe(_ =>
         {
 
         }).AddTo(this);
@@ -80,5 +91,10 @@ public class SettingDialog : DialogBase
             LocalPrefs.DeleteAll();
             sceneTransitioner.NextScene(SceneName.SCENE_SPLASH, null, true);
         }).AddTo(this);
+    }
+
+    private void OnCloseNextDialog()
+    {
+        gameObject.SetActive(true);
     }
 }
