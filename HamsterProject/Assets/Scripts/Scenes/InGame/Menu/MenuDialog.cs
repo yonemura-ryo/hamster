@@ -6,11 +6,11 @@ using UniRx;
 
 public class MenuDialog : DialogBase
 {
-    [SerializeField] CustomButton BookButton  = null; // 図鑑
-    [SerializeField] CustomButton ShopButton  = null; // ショップ
-    [SerializeField] CustomButton MissionButton  = null; // ミッション
-    [SerializeField] CustomButton HowToButton  = null; // 遊び方
-    [SerializeField] CustomButton SettingsButton  = null; // 設定
+    [SerializeField] CustomButton BookButton  = null; // ?}??
+    [SerializeField] CustomButton ShopButton  = null; // ?V???b?v
+    [SerializeField] CustomButton MissionButton  = null; // ?~?b?V????
+    [SerializeField] CustomButton HowToButton  = null; // ?V????
+    [SerializeField] CustomButton SettingsButton  = null; // ????
 
     private IDialogContainer dialogContainer;
     private ISoundPlayer soundPlayer;
@@ -44,13 +44,13 @@ public class MenuDialog : DialogBase
         SettingsButton.OnClickAsObservable().Subscribe(_ =>
         {
             SettingDialog settingDialog = dialogContainer?.Show<SettingDialog>(OnCloseNextDialog);
-            settingDialog?.Initialize(soundPlayer, sceneTransitioner);
+            settingDialog?.Initialize(dialogContainer, soundPlayer, sceneTransitioner);
             gameObject.SetActive(false);
         }).AddTo(this);
     }
 
     /// <summary>
-    /// ダイアログ表示
+    /// ?_?C?A???O?\??
     /// </summary>
     public override void Show(Action closeAction = null)
     {
@@ -65,7 +65,7 @@ public class MenuDialog : DialogBase
     }
 
     /// <summary>
-    /// ダイアログを閉じる
+    /// ?_?C?A???O????????
     /// </summary>
     public override void Close()
     {
