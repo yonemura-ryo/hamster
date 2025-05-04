@@ -83,7 +83,8 @@ public class SettingDialog : DialogBase
 
         staffButton.OnClickAsObservable().Subscribe(_ =>
         {
-
+            dialogContainer?.Show<StaffRollDialog>(OnCloseNextDialog);
+            gameObject.SetActive(false);
         }).AddTo(this);
 
         deleteDataButton.OnClickAsObservable().Subscribe(_ =>
