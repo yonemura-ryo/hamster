@@ -4485,7 +4485,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.size
-      value: 13
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.data[0]
@@ -4510,7 +4510,7 @@ PrefabInstance:
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.data[5]
       value: 
-      objectReference: {fileID: 7851828309264464707, guid: 5068b811e7f062e44a54666379f5097d, type: 3}
+      objectReference: {fileID: 4440857898652322927, guid: 5068b811e7f062e44a54666379f5097d, type: 3}
     - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: dialogs.Array.data[6]
       value: 
@@ -4539,6 +4539,10 @@ PrefabInstance:
       propertyPath: dialogs.Array.data[12]
       value: 
       objectReference: {fileID: 8772792119125691759, guid: 515fc609a60934abbbb7cd803261f57c, type: 3}
+    - target: {fileID: 3689046810839321913, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
+      propertyPath: dialogs.Array.data[13]
+      value: 
+      objectReference: {fileID: 2023390704295524205, guid: 29f9937350eca4ca6a2fd71a5ccb18ac, type: 3}
     - target: {fileID: 4989339025704560640, guid: 02fe2173336684444b2470f0aaa8ac84, type: 3}
       propertyPath: m_IsActive
       value: 0
