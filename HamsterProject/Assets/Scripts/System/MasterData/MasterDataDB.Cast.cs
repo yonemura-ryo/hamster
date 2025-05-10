@@ -174,4 +174,26 @@ public partial class MasterDataDB
 
         return result;
     }
+
+    public Dictionary<int, MissionMaster> GetMissionMaster(string masterName)
+    {
+        Dictionary<int, MissionMaster> result = new Dictionary<int, MissionMaster>();
+        List<string[]> csvData = ImportMasterCsv(masterName);
+        foreach (string[] line in csvData)
+        {
+            int Id = int.Parse(line[0]);
+            result.Add(Id, new MissionMaster(
+                Id,
+                int.Parse(line[1]),
+                int.Parse(line[2]),
+                int.Parse(line[3]),
+                int.Parse(line[4]),
+                int.Parse(line[5]),
+                int.Parse(line[6]),
+                line[7]
+            ));
+        }
+
+        return result;
+    }
 }

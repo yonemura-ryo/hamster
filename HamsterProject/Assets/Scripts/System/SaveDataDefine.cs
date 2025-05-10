@@ -12,6 +12,7 @@ public static class SaveData
         public const string HavingFoodData = "HavingFoodData";
         public const string HamsterExistData = "HamsterExistData";
         public const string HamsterCapturedListData = "HamsterCapturedListData";
+        public const string MissionProgressListData = "MissionProgressListData";
 
         public const string SoundVolume = "SoundVolume";
     }

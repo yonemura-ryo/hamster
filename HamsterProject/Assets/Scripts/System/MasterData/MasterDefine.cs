@@ -14,5 +14,6 @@ public class MasterDefine
         public const string FoodMaster = "m_food";
         public const string UserRankMaster = "m_user_rank";
         public const string RarityLotteryMaster = "m_rarity_lottery";
+        public const string MissionMaster = "m_mission";
     }
 }
