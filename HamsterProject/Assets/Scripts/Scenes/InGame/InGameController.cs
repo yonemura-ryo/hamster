@@ -50,6 +50,7 @@ public class InGameController : SceneControllerBase
     
     /// <summary>  ダイアログコンテナ公開用 </summary>
     public IDialogContainer DialogContainer => dialogContainer;
+    private MissionManager missionManager = null;
 
     [SerializeField] private Camera mainCamera;
 
@@ -97,6 +98,8 @@ public class InGameController : SceneControllerBase
             hamsterCapturedListData.capturedDataDictionary = new SerializableDictionary<string, HamsterCapturedData>();
             LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
         }
+        // ミッション進行状態の読み込み
+        missionManager = new MissionManager();
 
         InGameModel model = new InGameModel(SystemScene.Instance.SceneTransitioner);
         SystemScene systemScene = SystemScene.Instance;
@@ -107,8 +110,10 @@ public class InGameController : SceneControllerBase
             systemScene.SceneTransitioner,
             userCommonDataReadOnly,
             hamsterCapturedListDataReadOnly,
+            missionManager.missionProgressListDataReadOnly,
             AddCoin,
             AcquireFood,
+            (missionId, itemId, itemNum) => { missionManager.receiveMission(missionId, itemId, itemNum, AcquireFood); },
             FacilityListDataReadOnly,
             UpdateFacilityLevel
             );
@@ -224,7 +229,7 @@ public class InGameController : SceneControllerBase
     /// <param name="addCoinCount"></param>
     public void AddCoin(int addCoinCount)
     {
-        Debug.Log("addCoin:" + addCoinCount);
+        //Debug.Log("addCoin:" + addCoinCount);
         userCommonData.coinCount += addCoinCount;
         // 0以下は0にする(ここでは不足チェックしない)
         if (userCommonData.coinCount < 0)
@@ -234,6 +239,8 @@ public class InGameController : SceneControllerBase
         inGamePresenter.UpdateCoinText(userCommonData.coinCount);
         // ユーザーデータセーブ
         LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
+        // ミッション進行
+        missionManager.missionProgressGetCoin(addCoinCount);
     }
 
     /// <summary>
@@ -243,6 +250,7 @@ public class InGameController : SceneControllerBase
     public void AddExp(int addExp)
     {
         Debug.Log("addExp:" + addExp);
+        //int beforUserRank = userCommonData.userRank;
         userCommonData.exp += addExp;
         // ユーザーランク上昇判定
         bool isRankUp = true;
@@ -284,6 +292,8 @@ public class InGameController : SceneControllerBase
         }
         // ユーザーデータセーブ
         LocalPrefs.Save(SaveData.Key.UserCommonData, userCommonData);
+        // ミッション進行
+        missionManager.missionProgressUserRank(userCommonData.userRank);
     }
 
     /// <summary>
@@ -304,6 +314,8 @@ public class InGameController : SceneControllerBase
         LocalPrefs.Save(SaveData.Key.FacilityList, facilityListData);
         // facilityの変数更新
         facilities[facilityId -1].UpdateMemberValue(facilityListData.facilityDictionary[facilityId].level);
+        // ミッション進行
+        missionManager.missionProgressFacilityStrength(facilityId);
         return true;
     }
     
@@ -504,6 +516,8 @@ public class InGameController : SceneControllerBase
             hamsterCapturedListData.capturedDataDictionary[key] = hamsterCapturedData;
         }
         LocalPrefs.Save(SaveData.Key.HamsterCapturedListData, hamsterCapturedListData);
+        // ミッション進行
+        missionManager.missionProgressFixBugster(hamsterId);
     }
 
     /// <summary>
@@ -530,7 +544,8 @@ public class InGameController : SceneControllerBase
             AcquireFood,
             AddExp,
             DebugCaptureAllHamster,
-            DebugReleaseAllHamster
+            DebugReleaseAllHamster,
+            missionManager
             );
     }
 

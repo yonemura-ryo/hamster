@@ -20,6 +20,7 @@ public class InGamePresenter : MonoBehaviour
     [SerializeField] private CustomButton MenuButton = null;
     [SerializeField] private CustomButton ShopButton = null;
     [SerializeField] private CustomButton bookButton = null;
+    [SerializeField] private CustomButton missionButton = null;
 
     /// <summary>
     /// Initialize.
@@ -32,8 +33,10 @@ public class InGamePresenter : MonoBehaviour
         ISceneTransitioner sceneTransitioner,
         UserCommonData userCommonData,
         HamsterCapturedListData hamsterCapturedListData,
+        MissionProgressListData missionProgressListData,
         Action<int> acquireCoin,
         Action<int, int> acquireFood,
+        Action<int, int,int> receiveMission,
         FacilityListData facilityListData,
         Func<int,int, bool>updateFacilityLevel
         )
@@ -69,6 +72,13 @@ public class InGamePresenter : MonoBehaviour
         {
             BookDialog bookDialog = dialogContainer.Show<BookDialog>(null);
             bookDialog.Initialize(dialogContainer, hamsterCapturedListData);
+        }).AddTo(this);
+
+        // ミッション
+        missionButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            MissionDialog missionDialog = dialogContainer.Show<MissionDialog>(null);
+            missionDialog.Initialize(dialogContainer, missionProgressListData, receiveMission);
         }).AddTo(this);
     }
 
