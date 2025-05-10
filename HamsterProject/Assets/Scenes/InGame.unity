@@ -4217,6 +4217,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1439632319}
     m_Modifications:
+    - target: {fileID: 4145321260551240118, guid: 6708e6e5a42cf4768b953588c9de4e44, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 2131b37c02da843088067bc5222a35c0, type: 3}
     - target: {fileID: 5725340029152954448, guid: 6708e6e5a42cf4768b953588c9de4e44, type: 3}
       propertyPath: m_Name
       value: HeaderRoot
