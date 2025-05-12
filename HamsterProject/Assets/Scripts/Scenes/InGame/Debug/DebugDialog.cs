@@ -11,6 +11,9 @@ public class DebugDialog : DialogBase
     private Action clearData = null;
     private Action<int,int> acquireFood = null;
     private Action<int> addExp = null;
+    private MissionManager missionManager = null;
+
+    private List<int> missionOptions = new List<int>();
     
     [SerializeField] private Button addCoinButton;
     [SerializeField] private Button removeCoinButton;
@@ -18,22 +21,55 @@ public class DebugDialog : DialogBase
     [SerializeField] private Button acquireFoodButton;
     [SerializeField] private Button notificationButton;
     [SerializeField] private Button addExpButton;
+    [SerializeField] private Button captureHamButton;
+    [SerializeField] private Button releaseHamButton;
+    [SerializeField] private TMP_Dropdown missionClearDropDown;
+    [SerializeField] private Button missionClearButton;
+    [SerializeField] private TMP_Dropdown missionResetDropDown;
+    [SerializeField] private Button missionResetButton;
 
-    
-    public void Initialize(Action<int> addCoin, Action clearData, Action<int,int> acquireFood, Action<int> addExp)
+
+
+    public void Initialize(
+        Action<int> addCoin,
+        Action clearData,
+        Action<int,int> acquireFood,
+        Action<int> addExp,
+        Action captureAllHamster,
+        Action releaseAllHamster,
+        MissionManager missionManager
+        )
     {
         this.addCoin = addCoin;
         this.clearData = clearData;
         this.acquireFood = acquireFood;
         this.addExp = addExp;
+        this.missionManager = missionManager;
 
         // ボタンイベント
         addCoinButton.onClick.AddListener(OnClickAddCoin);
-        removeCoinButton.onClick.AddListener(OnClickAddCoin);
+        removeCoinButton.onClick.AddListener(OnClickRemoveCoin);
         clearDataButton.onClick.AddListener(OnClickClearData);
         acquireFoodButton.onClick.AddListener(OnClickAcquireFood);
         notificationButton.onClick.AddListener(OnClickNotification);
         addExpButton.onClick.AddListener(OnClickAddExp);
+        captureHamButton.onClick.AddListener(()=>captureAllHamster());
+        releaseHamButton.onClick.AddListener(() => releaseAllHamster());
+        missionClearButton.onClick.AddListener(OnClickMissionClear);
+        missionResetButton.onClick.AddListener(OnClickMissionReset);
+        missionOptions = missionManager.getAllMissionIds();
+        // ミッションIDドロップダウン
+        missionClearDropDown.ClearOptions();
+        missionResetDropDown.ClearOptions();
+        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+
+        foreach (int value in missionOptions)
+        {
+            options.Add(new TMP_Dropdown.OptionData(value.ToString()));
+        }
+
+        missionClearDropDown.AddOptions(options);
+        missionResetDropDown.AddOptions(options);
     }
 
     public void OnClickAddCoin()
@@ -73,7 +109,27 @@ public class DebugDialog : DialogBase
 
     public void OnClickAddExp()
     {
-        // 経験値100追加する
-        addExp(100);
+        // 経験値10追加する
+        addExp(10);
+    }
+
+    /// <summary>
+    /// ミッションクリアデバッグ
+    /// </summary>
+    public void OnClickMissionClear()
+    {
+        int index = missionClearDropDown.value;
+        int missionId = missionOptions[index];
+        missionManager.completeMission(missionId);
+    }
+
+    /// <summary>
+    /// ミッションクリアデバッグ
+    /// </summary>
+    public void OnClickMissionReset()
+    {
+        int index = missionResetDropDown.value;
+        int missionId = missionOptions[index];
+        missionManager.resetMission(missionId);
     }
 }

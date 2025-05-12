@@ -67,7 +67,7 @@ public class ShopDialog : DialogBase
         this.userCommonData = userCommonData;
         this.buyFood = buyFood;
         this.updateFacilityLevel = updateFacilityLevel;
-        userCoinText.text = userCommonData.coinCount.ToString();
+        //userCoinText.text = userCommonData.coinCount.ToString();
 
         // マスタ読み込み
         facilityLevelMaster = MasterData.DB.FacilityLevelMaster;
@@ -80,7 +80,7 @@ public class ShopDialog : DialogBase
             GameObject shopFoodContentObject = Instantiate(shopFoodContentPrefab, Vector3.zero, Quaternion.identity, foodContent);
             shopFoodContentObject.GetComponent<ShopFoodContent>().Initialize(
                 foodMaster.Name,
-                $"Images/Foods/{foodMaster.ImagePath}",
+                $"2DAssets/Images/SpriteAtlasImages/item/item_{foodMaster.FoodId}",
                 foodMaster.Price,
                 foodMaster.Description,
                 (description) =>
@@ -161,7 +161,7 @@ public class ShopDialog : DialogBase
             ShopFacilityContent shopFacilityContent = shopFacilityContentObject.GetComponent<ShopFacilityContent>();
             shopFacilityContent.Initialize(
                 facilityMaster.Name,
-                $"Images/Facilities/{facilityMaster.ImagePath}",
+                $"2DAssets/Images/Facilities/{facilityMaster.ImagePath}",
                 nextLevel,
                 priceByLevel,
                 description,
@@ -234,7 +234,7 @@ public class ShopDialog : DialogBase
     {
         gameObject.SetActive(true);
         // 所持コイン数を更新しておく
-        userCoinText.text = userCommonData.coinCount.ToString();
+        //userCoinText.text = userCommonData.coinCount.ToString();
         // 詳細表示をリセットする
         descriptionText.text = "";
     }

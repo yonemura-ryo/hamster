@@ -98,6 +98,26 @@ public class UserCommonData
     public int userRank;
 }
 
+/// <summary>
+/// ミッション進捗状態データ配列
+/// </summary>
+[System.Serializable]
+public class MissionProgressListData
+{
+    public SerializableDictionary<int, MissionProgressData> missionProgressDictionary;
+}
+
+/// <summary>
+/// ミッション進捗状態データ
+/// </summary>
+[System.Serializable]
+public class MissionProgressData
+{
+    public int missionId;
+    public int progressValue;
+    public bool isCompleted;
+    public bool isReceived;
+}
 
 [System.Serializable]
 public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
